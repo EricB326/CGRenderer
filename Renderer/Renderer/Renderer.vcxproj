@@ -146,6 +146,10 @@
   <ItemGroup>
     <ClCompile Include="..\Dependencies\glcore\gl_core_4_5.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Mesh.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
