@@ -9,11 +9,8 @@
 #include <sstream>
 #include <vector>
 
+#include "common.h"
 #include "Mesh.h"
-
-using uint = unsigned int;
-#define WIDTH 1280
-#define HEIGHT 720
 
 int main()
 {
@@ -60,62 +57,43 @@ int main()
 	//};
 
 	// Large floor plane points
-	//								  Positions            Colour
-	//							   X     Y       Z     R      G     Z
-	//GLfloat floorVertices[] = { 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,   // Back Left
-	//							0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,   // Back Right
-	//							0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f,   // Front Left
-	//							0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f }; // Front Right
-	GLfloat floorVertices[] = { 0.0f, 0.0f, 0.0f,
-								0.0f, 0.0f, 0.0f,
-								0.0f, 0.0f, 0.0f,
-								0.0f, 0.0f, 0.0f };
+	//								Positions             Colour
+	//							 X     Y       Z      R      G     B
+	GLfloat floor_verts[] = { -10.0f, 0.0f, -10.0f,  0.0f,  0.0f, 0.0f,   // Back Left
+							   10.0f, 0.0f, -10.0f, 10.0f,  0.0f, 0.0f,   // Back Right
+							  -10.0f, 0.0f,  10.0f,  0.0f, 10.0f, 0.0f,   // Front Left
+							   10.0f, 0.0f,  10.0f, 10.0f, 10.0f, 0.0f }; // Front Right
 
-	GLuint floorIndices[] = { 0, 2, 1, 1, 2, 3 };
+	GLuint floor_indices[] = { 0, 2, 1, 1, 2, 3 };
 
 	// Create the points on a cube
 	//					        Positions             Colours       
 	//						 X      Y      Z      R      G      B   
-	GLfloat vertices[] = { -1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f,   // Bot left	     -- 0
-							1.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,   // Bot right	     -- 1
-						   -1.0f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,   // Top left	     -- 2
-							1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f,   // Top right	     -- 3
-						   -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,   // Back bot left  -- 4
-							1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,   // Back bot right -- 5
-						   -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,   // Back top left  -- 6
-							1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f }; // Back top right -- 7
-
-	// Create the faces of a cube
-	GLuint indices[] = { 0, 2, 6, 6, 4, 0,  // Left face
-						 1, 3, 7, 7, 5, 1,  // Right face
-						 4, 6, 7, 7, 5, 4,  // Back face
-						 0, 2, 3, 3, 1, 0,  // Front face
-						 0, 4, 5, 5, 1, 0,  // Bot face
-						 2, 6, 7, 7, 3, 2}; // Top face
+	//GLfloat vertices[] = { -1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f,   // Bot left	     -- 0
+	//						1.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,   // Bot right	     -- 1
+	//					   -1.0f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,   // Top left	     -- 2
+	//						1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f,   // Top right	     -- 3
+	//					   -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,   // Back bot left  -- 4
+	//						1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,   // Back bot right -- 5
+	//					   -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,   // Back top left  -- 6
+	//						1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f }; // Back top right -- 7
+	//
+	//// Create the faces of a cube
+	//GLuint indices[] = { 0, 2, 6, 6, 4, 0,  // Left face
+	//					 1, 3, 7, 7, 5, 1,  // Right face
+	//					 4, 6, 7, 7, 5, 4,  // Back face
+	//					 0, 2, 3, 3, 1, 0,  // Front face
+	//					 0, 4, 5, 5, 1, 0,  // Bot face
+	//					 2, 6, 7, 7, 3, 2}; // Top face
 
 	/*** Create and 'load' floor mesh ***/
-	Mesh* floor_object = new Mesh();
-	floor_object->CreateMesh(floorVertices, floorIndices, 12, 6);
+	Mesh* floor_object = new Mesh(floor_verts, floor_indices, 24, 6, BASIC_VERTEX);
 	mesh_list.push_back(floor_object);
-	//uint VAO, VBO, IBO;
-
-	//glGenVertexArrays(1, &VAO);
-	//glGenBuffers(1, &VBO);
-
-	//glBindVertexArray(VAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 36, vertices, GL_STATIC_DRAW);
-	//
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), 0);
-
-	//glBindVertexArray(0);
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	/*** Camera ***/
-	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)WIDTH / (float)HEIGHT, 0.1f, 5.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)WIDTH / (float)HEIGHT, 1.0f, 100.0f);
 	glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0), glm::vec3(0, 1, 0));
-	glm::mat4 model = glm::mat4(1);
+	glm::mat4 model = glm::mat4(1.0f);
 
 	/*** Grab Shaders ***/
 	uint vertex_shader_id = 0;
@@ -254,33 +232,44 @@ int main()
 
 
 	/*** Background colour ***/
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+
+	glm::vec4 colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
+	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0;
+
 	/*** Game Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
-	{ 
+	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		
-		model = glm::rotate(model, 0.016f, glm::vec3(0.0, 1.0, 1.0));
-		//GLfloat scale_amount = sin(glfwGetTime());
-		//model = glm::scale(model, glm::vec3(scale_amount, scale_amount, scale_amount));
 
+		// User created shader program
+		glUseProgram(shader_program_id);
+
+		uniform_projection_location = glGetUniformLocation(shader_program_id, "projection_view_matrix");
+		uniform_model_location = glGetUniformLocation(shader_program_id, "model_matrix");
+		uniform_colour_location = glGetUniformLocation(shader_program_id, "colour");
 
 		glm::mat4 projection_view = projection * view;
-		glm::vec4 colour = glm::vec4(glm::sin(glfwGetTime()), -glm::sin(glfwGetTime()), 0.5, 1.0);
 
-		glUseProgram(shader_program_id);
-		auto uniform_location = glGetUniformLocation(shader_program_id, "projection_view_matrix");
-		glUniformMatrix4fv(uniform_location, 1, false, glm::value_ptr(projection_view));
-		uniform_location = glGetUniformLocation(shader_program_id, "model_matrix");
-		glUniformMatrix4fv(uniform_location, 1, false, glm::value_ptr(model));
-		uniform_location = glGetUniformLocation(shader_program_id, "colour");
-		glUniform4fv(uniform_location, 1, glm::value_ptr(colour));
+		glUniformMatrix4fv(uniform_projection_location, 1, false, glm::value_ptr(projection_view));
+		//model = glm::rotate(model, 0.016f, glm::vec3(1.0, 0.0, 0.0));
+		//GLfloat scale_amount = sin(glfwGetTime());
+		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 1.0f));
 
-		mesh_list[0]->RenderMesh();
+
+		//glm::vec4 colour = glm::vec4(glm::sin(glfwGetTime()), -glm::sin(glfwGetTime()), 0.5, 1.0);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+
+		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
+		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
+
+		mesh_list[0]->draw();
 
 		/*glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, number_of_verts);*/
