@@ -59,12 +59,12 @@ int main()
 	// Large floor plane points
 	//								Positions             Colour
 	//							 X     Y       Z      R      G     B
-	GLfloat floor_verts[] = { -10.0f, 0.0f, -10.0f,  0.0f,  0.0f, 0.0f,   // Back Left
-							   10.0f, 0.0f, -10.0f, 10.0f,  0.0f, 0.0f,   // Back Right
-							  -10.0f, 0.0f,  10.0f,  0.0f, 10.0f, 0.0f,   // Front Left
-							   10.0f, 0.0f,  10.0f, 10.0f, 10.0f, 0.0f }; // Front Right
+	GLfloat floor_verts[] = { -0.25f, 0.0f, -0.25f,  0.0f,  0.0f, 0.0f,   // Back Left
+							   0.25f, 0.0f, -0.25f, 1.0f,  0.0f, 0.0f,   // Back Right
+							  -0.25f, 0.0f,  0.25f,  0.0f, 1.0f, 0.0f,   // Front Left
+							   0.25f, 0.0f,  0.25f, 1.0f, 1.0f, 0.0f }; // Front Right
 
-	GLuint floor_indices[] = { 0, 2, 1, 1, 2, 3 };
+	GLuint floor_indices[] = { 1, 0, 2, 2, 3, 1 };
 
 	// Create the points on a cube
 	//					        Positions             Colours       
@@ -87,7 +87,7 @@ int main()
 	//					 2, 6, 7, 7, 3, 2}; // Top face
 
 	/*** Create and 'load' floor mesh ***/
-	Mesh* floor_object = new Mesh(floor_verts, floor_indices, 24, 6, BASIC_VERTEX);
+	Mesh* floor_object = new Mesh(floor_verts, floor_indices, 24, 6, BASE_VERTEX);
 	mesh_list.push_back(floor_object);
 
 	/*** Camera ***/
@@ -240,6 +240,15 @@ int main()
 
 	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0;
 
+	{
+		model = glm::mat4(1.0f);
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		//model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+
+		glm::mat4 projection_view_model = projection * view * model;
+		floor_object->logMesh(projection_view_model);
+	}
+
 	/*** Game Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
@@ -256,20 +265,18 @@ int main()
 		glm::mat4 projection_view = projection * view;
 
 		glUniformMatrix4fv(uniform_projection_location, 1, false, glm::value_ptr(projection_view));
-		//model = glm::rotate(model, 0.016f, glm::vec3(1.0, 0.0, 0.0));
-		//GLfloat scale_amount = sin(glfwGetTime());
-		//model = glm::scale(model, glm::vec3(0.5f, 0.5f, 1.0f));
 
-
-		//glm::vec4 colour = glm::vec4(glm::sin(glfwGetTime()), -glm::sin(glfwGetTime()), 0.5, 1.0);
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		//model = glm::rotate(model, 0.016f, glm::vec3(0.0, 0.0, 1.0));
+
+		//colour = glm::vec4(glm::sin(glfwGetTime()), -glm::sin(glfwGetTime()), 0.5, 1.0);
 
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
 		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
 
-		mesh_list[0]->draw();
+		mesh_list[0]->render_mesh();
 
 		/*glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, number_of_verts);*/

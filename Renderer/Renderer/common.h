@@ -8,8 +8,9 @@ using uint = unsigned int;
 
 enum vertex_type
 {
-	BASIC_VERTEX,
-	STANDARD_VERTEX
+	BASE_VERTEX,
+	STANDARD_VERTEX,
+	FULL_VERTEX
 };
 
 #endif // !COMMON_H

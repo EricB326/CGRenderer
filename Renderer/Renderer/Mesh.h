@@ -14,7 +14,7 @@
 /* @brief Struct for storing data of a smaller and simplier
     vertex being created.
 */
-struct basic_vertex
+struct base_vertex
 {
 	/* @brief Position of vertex.
 	*/
@@ -40,7 +40,37 @@ struct vertex
 
 	/* @brief Texture coords of vertex.
 	*/
-	glm::vec2 m_texels;
+	glm::vec2 m_tex_coords;
+};
+
+/* @brief Struct for storing data of a full vertex
+	with multiple data types
+*/
+struct full_vertex
+{
+	/* @brief Position of vertex.
+	*/
+	glm::vec3 m_position;
+
+	/* @brief Normals of vertex.
+	*/
+	glm::vec3 m_normal;
+
+	/* @brief Tangent of vertex.
+	*/
+	glm::vec4 m_tangent;
+
+	/* @brief First set of texture coords of vertex.
+	*/
+	glm::vec2 m_tex_coords001;
+
+	/* @brief Second set of texture coords of vertex.
+	*/
+	glm::vec2 m_tex_coords002;
+
+	/* @brief Third set of texture coords of vertex.
+	*/
+	glm::vec2 m_tex_coords003;
 };
 
 /* @brief Handles the creation and rendering of vertices in
@@ -49,18 +79,6 @@ struct vertex
 class Mesh
 {
 public:
-	/******************************************************/
-	// Variables
-    /* @brief Declareation of the basic_vertex struct, to
-		prepare for initialized data.
-	*/
-	basic_vertex m_basic_verticies;
-
-	/* @brief Declareation of the vertex struct, to
-		prepare for initialized data.
-	*/
-	vertex m_verticies;
-
 	/******************************************************/
 	// Functions
 	/* @brief Constructor zeros all values with no params.
@@ -95,6 +113,16 @@ private:
 	*/
 	GLuint m_VAO, m_VBO, m_EBO;
 
+	/* @brief Declareation of the basic_vertex struct, to
+		prepare for initialized data.
+	*/
+	std::vector<base_vertex> m_basic_verticies;
+
+	/* @brief Declareation of the vertex struct, to
+		prepare for initialized data.
+	*/
+	std::vector<vertex> m_verticies;
+
 	/* @brief The data passed through from the index
 		array.
 	*/
@@ -121,6 +149,18 @@ private:
 		array/vertex objects.
 	*/
 	void clear_mesh();
+
+public:
+	void logMesh(glm::mat4 mvp) {
+		for (size_t i = 0; i < m_index_count; i++)
+		{
+			int index = m_indices[i];
+
+			auto vert = mvp * glm::vec4(m_basic_verticies[index].m_position, 1.0f);
+
+			std::cout << "X: " << vert.x << ", Y: " << vert.y << ", Z: " << vert.z << "\n";
+		}
+	}
 };
 
 
