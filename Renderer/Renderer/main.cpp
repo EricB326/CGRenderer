@@ -46,23 +46,14 @@ int main()
 
 	/*** Mesh data ***/
 	std::vector<Mesh*> mesh_list;
-	//glm::vec3 vertices[] =
-	//{
-	//	glm::vec3(-0.5f, 0.5f, 0.0f),
-	//	glm::vec3(-0.5f, -0.5f, 0.0f),
-	//	glm::vec3(0.5f, 0.5f, 0.0f),
-	//	glm::vec3(0.5f, 0.5f, 0.0f),
-	//	glm::vec3(-0.5f, -0.5f, 0.0f),
-	//	glm::vec3(0.5f, -0.5f, 0.0f)
-	//};
 
 	// Large floor plane points
 	//								Positions             Colour
-	//							 X     Y       Z      R      G     B
-	GLfloat floor_verts[] = { -0.25f, 0.0f, -0.25f,  0.0f,  0.0f, 0.0f,   // Back Left
-							   0.25f, 0.0f, -0.25f, 1.0f,  0.0f, 0.0f,   // Back Right
-							  -0.25f, 0.0f,  0.25f,  0.0f, 1.0f, 0.0f,   // Front Left
-							   0.25f, 0.0f,  0.25f, 1.0f, 1.0f, 0.0f }; // Front Right
+	//							X     Y      Z      R      G     B
+	GLfloat floor_verts[] = { -1.0f, 0.0f, -1.0f,  0.0f,  0.0f, 0.0f,   // Back Left
+							   1.0f, 0.0f, -1.0f, 1.0f,  0.0f, 0.0f,   // Back Right
+							  -1.0f, 0.0f,  1.0f,  0.0f, 1.0f, 0.0f,   // Front Left
+							   1.0f, 0.0f,  1.0f, 1.0f, 1.0f, 0.0f }; // Front Right
 
 	GLuint floor_indices[] = { 1, 0, 2, 2, 3, 1 };
 
@@ -92,7 +83,7 @@ int main()
 
 	/*** Camera ***/
 	glm::mat4 projection = glm::perspective(glm::radians(90.0f), (float)WIDTH / (float)HEIGHT, 1.0f, 100.0f);
-	glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0), glm::vec3(0, 1, 0));
+	glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 model = glm::mat4(1.0f);
 
 	/*** Grab Shaders ***/
@@ -240,15 +231,6 @@ int main()
 
 	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0;
 
-	{
-		model = glm::mat4(1.0f);
-		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
-		//model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-
-		glm::mat4 projection_view_model = projection * view * model;
-		floor_object->logMesh(projection_view_model);
-	}
-
 	/*** Game Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
@@ -277,9 +259,6 @@ int main()
 		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
 
 		mesh_list[0]->render_mesh();
-
-		/*glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, number_of_verts);*/
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

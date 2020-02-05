@@ -52,6 +52,10 @@ struct full_vertex
 	*/
 	glm::vec3 m_position;
 
+	/* @brief Colour of vertex.
+	*/
+	glm::vec3 m_colour;
+
 	/* @brief Normals of vertex.
 	*/
 	glm::vec3 m_normal;
@@ -150,17 +154,6 @@ private:
 	*/
 	void clear_mesh();
 
-public:
-	void logMesh(glm::mat4 mvp) {
-		for (size_t i = 0; i < m_index_count; i++)
-		{
-			int index = m_indices[i];
-
-			auto vert = mvp * glm::vec4(m_basic_verticies[index].m_position, 1.0f);
-
-			std::cout << "X: " << vert.x << ", Y: " << vert.y << ", Z: " << vert.z << "\n";
-		}
-	}
 };
 
 
