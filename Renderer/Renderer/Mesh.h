@@ -1,14 +1,21 @@
 #ifndef MESH_H
 #define MESH_H
 
-// Standard includes
+/* Standard lib includes
+*/
 #include <iostream>
 #include <vector>
-// Graphics includes
+
+/* Graphic includes
+*/
 #include "gl_core_4_5.h"
-// Math includes
+
+/* Math includes
+*/
 #include "glm.hpp"
-// User defined includes
+
+/* User defined includes
+*/
 #include "common.h"
 
 /* @brief Struct for storing data of a smaller and simplier
@@ -28,7 +35,7 @@ struct base_vertex
 /* @brief Struct for storing data of a standard vertex
     with commonly used data.
 */
-struct vertex
+struct standard_vertex
 {
 	/* @brief Position of vertex.
 	*/
@@ -117,15 +124,20 @@ private:
 	*/
 	GLuint m_VAO, m_VBO, m_EBO;
 
-	/* @brief Declareation of the basic_vertex struct, to
+	/* @brief Declareation of the base_vertex struct, to
 		prepare for initialized data.
 	*/
-	std::vector<base_vertex> m_basic_verticies;
+	std::vector<base_vertex> m_base_vert;
 
-	/* @brief Declareation of the vertex struct, to
+	/* @brief Declareation of the standard_vertex struct, to
 		prepare for initialized data.
 	*/
-	std::vector<vertex> m_verticies;
+	std::vector<standard_vertex> m_standard_vert;
+
+	/* @brief Declareation of the full_vertex struct, to
+	prepare for initialized data.
+*/
+	std::vector<full_vertex> m_full_vert;
 
 	/* @brief The data passed through from the index
 		array.
@@ -144,10 +156,20 @@ private:
 
 	/******************************************************/
 	// Functions
-	/* @brief Initializes all the array/buffer objects to be
-	    ready for rendering the mesh.
+	/* @brief Initializes all the base vertex array/buffer objects 
+		to be ready for rendering the mesh.
 	*/
-	void setup_mesh();
+	void setup_base_mesh();
+
+	/* @brief Initializes all the standard vertex array/buffer objects
+		to be ready for rendering the mesh.
+	*/
+	void setup_standard_mesh();
+
+	/* @brief Initializes all the full vertex array/buffer objects
+		to be ready for rendering the mesh.
+	*/
+	void setup_full_mesh();
 
 	/* @brief Clears all the buffers and resets the
 		array/vertex objects.
