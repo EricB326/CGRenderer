@@ -52,7 +52,7 @@ bool ShaderManager::load_from_file(const std::string a_shader_name, const std::s
 			}
 			default:
 			{
-				std::cout << "Shader type passed is invalid!\n";
+				printf("Shader type passed is invalid!\n");
 				break;
 			}
 		}
@@ -69,7 +69,7 @@ void ShaderManager::create_shader_program(const std::vector<std::string>& a_key_
 	// Verify the shader program was successfully made.
 	if (!m_shader_program_id)
 	{
-		std::cout << "Creating shader program failed!\n";
+		printf("Creating shader program failed!\n");
 		return;
 	}
 
@@ -91,26 +91,26 @@ void ShaderManager::create_shader_program(const std::vector<std::string>& a_key_
 	// Link the program.
 	glLinkProgram(m_shader_program_id);
 
-	// Check for linking errors
+	// Check for linking errors.
 	GLint success = GL_FALSE;
 	glGetProgramiv(m_shader_program_id, GL_LINK_STATUS, &success);
 
 	if (!success)
 	{
-		// Get the length of the error
+		// Get the length of the error.
 		GLint log_length = 0;
 		glGetProgramiv(m_shader_program_id, GL_INFO_LOG_LENGTH, &log_length);
-		// Create the error buffer
+		// Create the error buffer.
 		char* log = new char[log_length];
-		// Copy the error from the buffer
+		// Copy the error from the buffer.
 		glGetProgramInfoLog(m_shader_program_id, log_length, 0, log);
 
-		// Create the error message
+		// Create the error message.
 		std::string error_message(log);
 		error_message += "SHADER_FAILED_TO_COMPILE";
 		printf(error_message.c_str());
 
-		// Clean up
+		// Clean up.
 		delete[] log;
 	}
 }

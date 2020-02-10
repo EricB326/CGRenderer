@@ -117,7 +117,7 @@ void Mesh::render_mesh()
 	glBindVertexArray(m_VAO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
 
-	// Check if the program should draw using indicies or classic
+	// Check if the program should draw using indicies
 	if (m_EBO)
 		glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, 0);
 	else
