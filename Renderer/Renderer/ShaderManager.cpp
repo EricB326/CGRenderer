@@ -1,5 +1,7 @@
 #include "ShaderManager.h"
 
+/* Standard includes
+*/
 #include <iostream>
 #include <sstream>
 
@@ -125,14 +127,14 @@ uint ShaderManager::get_shader(const std::string& a_key)
 	// not found in the map.
 	if (m_shader_list_iterator == m_shader_list.end())
 	{
-		std::cout << "\nKey: '" << a_key << "' was not found! Perhaps verify you spelt the key correctly?\n";
+		printf("\nKey: '%s' was not found! Perhaps verify spelling?\n", a_key.c_str());
 
 		// Return error value.
 		return -1;
 	}
 	else
 	{
-		std::cout << "\nKey passed was present: " << m_shader_list_iterator->first << " contains the shader ID: " << m_shader_list_iterator->second << "\n";
+		printf("\nKey passed was present: %s contains the shader ID: %i\n", m_shader_list_iterator->first.c_str(), m_shader_list_iterator->second);
 
 		// Return the second part of the map, in this case the shader ID.
 		return m_shader_list_iterator->second;
@@ -144,7 +146,7 @@ void ShaderManager::use_shader()
 	// Check that the shader program ID has been created
 	if (!m_shader_program_id)
 	{
-		std::cout << "Error when attempting to use shader! Shader has no ID!\n";
+		printf("Error when attempting to use shader! Shader has no ID!\n");
 		return;
 	}
 
@@ -217,7 +219,7 @@ bool ShaderManager::read_file_data(const std::string& a_filename, std::string& a
 		if (file_is_empty(in_file_stream))
 		{
 			// Warn the user of the lack of content.
-			std::cout << "Contents of shader file \"" << a_filename << "\ is empty!\nHave you written and shader code?\n";
+			printf("Contents of shader file \%s\ is empty!\nHave you written any shader code?", a_filename.c_str());
 			return false;
 		}
 
@@ -233,7 +235,7 @@ bool ShaderManager::read_file_data(const std::string& a_filename, std::string& a
 	}
 
 	// File failed to open
-	std::cout << "Failed to open shader file \"" << a_filename << "\!\n";
+	printf("Failed to open shader file \%s\!\n", a_filename.c_str());
 	return false;
 }
 
@@ -253,11 +255,7 @@ void ShaderManager::mapping_check(const std::string& a_key)
 	// If we reached the end of the m_shader_list, the key was
 	// not found in the map.
 	if (m_shader_list_iterator == m_shader_list.end())
-	{
-		std::cout << "Mapping was unsuccessful!\n";
-	}
+		printf("Mapping was unsuccessful!\n");
 	else
-	{
-		std::cout << "Successfully mapped shader id: " << m_shader_list_iterator->second << " to the shader name (key): " << m_shader_list_iterator->first << "\n";
-	}
+		printf("Successfully mapped shader ID: %i to shader name (key): %s\n", m_shader_list_iterator->second, m_shader_list_iterator->first.c_str());
 }

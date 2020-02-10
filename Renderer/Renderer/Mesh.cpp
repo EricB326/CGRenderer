@@ -86,7 +86,7 @@ Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num
 		}
 		default:
 		{
-			std::cout << "No vertex type detected!\n";
+			printf("No vertex type detected!\n");
 			return;
 		}
 	}
@@ -103,13 +103,13 @@ void Mesh::render_mesh()
 	// Error checking for none existant IDs
 	if (!m_VAO)
 	{
-		std::cout << "VAO ID does not exist!\n";
+		printf("VAO ID does not exist!\n");
 		return;
 	}
 
 	if (!m_VBO)
 	{
-		std::cout << "VBO ID does not exist!\n";
+		printf("VBO ID does not exist!\n");
 		return;
 	}
 
