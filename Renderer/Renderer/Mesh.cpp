@@ -1,19 +1,21 @@
 #include "Mesh.h"
 
-Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, int a_vertex_type)
-	: m_VAO(0), m_VBO(0), m_EBO(0), m_indices(a_indices), m_index_count(a_num_of_indices), m_vert_count(a_num_of_verts)
+namespace uciniti
 {
-	// Check to see if the vertex type is invalid
-	if (a_vertex_type < 0 || a_vertex_type > 1)
+	Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type)
+		: m_VAO(0), m_VBO(0), m_EBO(0), m_indices(a_indices), m_index_count(a_num_of_indices), m_vert_count(a_num_of_verts)
 	{
-		std::cout << "Failed to construct mesh! Invalid vertex typed passed!\n";
-		return;
-	}
+		// Check to see if the vertex type is invalid
+		if ((uint)a_vertex_type < 0 || (uint)a_vertex_type > 1)
+		{
+			std::cout << "Failed to construct mesh! Invalid vertex typed passed!\n";
+			return;
+		}
 
-	// Check what vetex struct is being populated
-	switch (a_vertex_type)
-	{	
-		case BASE_VERTEX:
+		// Check what vetex struct is being populated
+		switch (a_vertex_type)
+		{
+		case vertex_type::BASE_VERTEX:
 		{
 			// Loop through the passed vertice array, jump by 6 spaces each time to return
 			// to the "start" of each new "segment" of data example:
@@ -36,7 +38,7 @@ Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num
 			setup_base_mesh();
 			break;
 		}
-		case STANDARD_VERTEX:
+		case vertex_type::STANDARD_VERTEX:
 		{
 			// Read above lines: 16 -> 19. Instead of jumping by 6, jump by 8.
 			for (size_t i = 0; i < m_vert_count; i += 8)
@@ -57,7 +59,7 @@ Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num
 			setup_standard_mesh();
 			break;
 		}
-		case FULL_VERTEX:
+		case vertex_type::FULL_VERTEX:
 		{
 			// Read above lines: 16 -> 19. Instead of jumping by 6, jump by 19.
 			for (size_t i = 0; i < m_vert_count; i += 19)
@@ -89,187 +91,188 @@ Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num
 			printf("No vertex type detected!\n");
 			return;
 		}
+		}
 	}
-}
 
-Mesh::~Mesh()
-{
-	// Make sure the object is cleared
-	clear_mesh();
-}
-
-void Mesh::render_mesh()
-{
-	// Error checking for none existant IDs
-	if (!m_VAO)
+	Mesh::~Mesh()
 	{
-		printf("VAO ID does not exist!\n");
-		return;
+		// Make sure the object is cleared
+		clear_mesh();
 	}
 
-	if (!m_VBO)
+	void Mesh::render_mesh()
 	{
-		printf("VBO ID does not exist!\n");
-		return;
+		// Error checking for none existant IDs
+		if (!m_VAO)
+		{
+			printf("VAO ID does not exist!\n");
+			return;
+		}
+
+		if (!m_VBO)
+		{
+			printf("VBO ID does not exist!\n");
+			return;
+		}
+
+		// Specify the VAO and EBO we are working with
+		glBindVertexArray(m_VAO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+
+		// Check if the program should draw using indicies
+		if (m_EBO)
+			glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, 0);
+		else
+			glDrawArrays(GL_TRIANGLES, 0, 3 * m_index_count);
+
+		// Unbind the VAO and EBO
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
-	// Specify the VAO and EBO we are working with
-	glBindVertexArray(m_VAO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-
-	// Check if the program should draw using indicies
-	if (m_EBO)
-		glDrawElements(GL_TRIANGLES, m_index_count, GL_UNSIGNED_INT, 0);
-	else
-		glDrawArrays(GL_TRIANGLES, 0, 3 * m_index_count);
-
-	// Unbind the VAO and EBO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Mesh::render()
-{
-	render_mesh();
-}
-
-void Mesh::draw()
-{
-	render_mesh();
-}
-
-void Mesh::setup_base_mesh()
-{
-	// Create the vertex array ID and bind it
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	// Create the vertex buffer ID and bind it
-	glGenBuffers(1, &m_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	// Attach the vertex data to the VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(base_vertex) * m_base_vert.size(), &m_base_vert[0], GL_STATIC_DRAW);
-
-	// Create EBO buffer ID and bind it
-	glGenBuffers(1, &m_EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	// Attach the indices data to the EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * m_index_count, &m_indices[0], GL_STATIC_DRAW);
-
-	// Create and enable the attribute for the position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(base_vertex), (GLvoid*)0);
-	// Create and enable the attribute for the colours
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(base_vertex), (GLvoid*)offsetof(base_vertex, m_colour));
-
-	// Unbind the VBO, EBO, and VAO
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Mesh::setup_standard_mesh()
-{
-	// Create the vertex array ID and bind it
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	// Create the vertex buffer ID and bind it
-	glGenBuffers(1, &m_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	// Attach the vertex data to the VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(standard_vertex) * m_standard_vert.size(), &m_standard_vert[0], GL_STATIC_DRAW);
-
-	// Create EBO buffer ID and bind it
-	glGenBuffers(1, &m_EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	// Attach the indices data to the EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * m_index_count, &m_indices[0], GL_STATIC_DRAW);
-
-	// Create and enable the attribute for the position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(standard_vertex), (GLvoid*)0);
-	// Create and enable the attribute for the normals
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(standard_vertex), (GLvoid*)offsetof(standard_vertex, m_normal));
-	// Create and enable the attribute for the texels (U/V)
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(standard_vertex), (GLvoid*)offsetof(standard_vertex, m_tex_coords));
-
-	// Unbind the VBO, EBO, and VAO
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Mesh::setup_full_mesh()
-{
-	// Create the vertex array ID and bind it
-	glGenVertexArrays(1, &m_VAO);
-	glBindVertexArray(m_VAO);
-
-	// Create the vertex buffer ID and bind it
-	glGenBuffers(1, &m_VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
-	// Attach the vertex data to the VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(full_vertex) * m_full_vert.size(), &m_full_vert[0], GL_STATIC_DRAW);
-
-	// Create EBO buffer ID and bind it
-	glGenBuffers(1, &m_EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-	// Attach the indices data to the EBO
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * m_index_count, &m_indices[0], GL_STATIC_DRAW);
-
-	// Create and enable the attribute for the position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)0);
-	// Create and enable the attribute for the colour
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_colour));
-	// Create and enable the attribute for the normal
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_normal));
-	// Create and enable the attribute for the tangent
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tangent));
-	// Create and enable the attribute for the texels (U/V) 001
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tex_coords001));
-	// Create and enable the attribute for the texels (U/V) 002
-	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tex_coords002));
-	// Create and enable the attribute for the texels (U/V) 003
-	glEnableVertexAttribArray(6);
-	glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tex_coords003));
-
-	// Unbind the VBO, EBO, and VAO
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void Mesh::clear_mesh()
-{
-	// Clear all the buffers off the graphics card and reset the IDs
-	if (m_VAO)
+	void Mesh::render()
 	{
-		glDeleteVertexArrays(1, &m_VAO);
-		m_VAO = 0;
+		render_mesh();
 	}
 
-	if (m_VBO)
+	void Mesh::draw()
 	{
-		glDeleteBuffers(1, &m_VBO);
-		m_VBO = 0;
+		render_mesh();
 	}
 
-	if (m_EBO)
+	void Mesh::setup_base_mesh()
 	{
-		glDeleteBuffers(1, &m_EBO);
-		m_EBO = 0;
+		// Create the vertex array ID and bind it
+		glGenVertexArrays(1, &m_VAO);
+		glBindVertexArray(m_VAO);
+
+		// Create the vertex buffer ID and bind it
+		glGenBuffers(1, &m_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		// Attach the vertex data to the VBO
+		glBufferData(GL_ARRAY_BUFFER, sizeof(base_vertex) * m_base_vert.size(), &m_base_vert[0], GL_STATIC_DRAW);
+
+		// Create EBO buffer ID and bind it
+		glGenBuffers(1, &m_EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+		// Attach the indices data to the EBO
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * m_index_count, &m_indices[0], GL_STATIC_DRAW);
+
+		// Create and enable the attribute for the position
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(base_vertex), (GLvoid*)0);
+		// Create and enable the attribute for the colours
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(base_vertex), (GLvoid*)offsetof(base_vertex, m_colour));
+
+		// Unbind the VBO, EBO, and VAO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 	}
 
-	// Reset the index count
-	m_index_count = 0;
+	void Mesh::setup_standard_mesh()
+	{
+		// Create the vertex array ID and bind it
+		glGenVertexArrays(1, &m_VAO);
+		glBindVertexArray(m_VAO);
+
+		// Create the vertex buffer ID and bind it
+		glGenBuffers(1, &m_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		// Attach the vertex data to the VBO
+		glBufferData(GL_ARRAY_BUFFER, sizeof(standard_vertex) * m_standard_vert.size(), &m_standard_vert[0], GL_STATIC_DRAW);
+
+		// Create EBO buffer ID and bind it
+		glGenBuffers(1, &m_EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+		// Attach the indices data to the EBO
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * m_index_count, &m_indices[0], GL_STATIC_DRAW);
+
+		// Create and enable the attribute for the position
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(standard_vertex), (GLvoid*)0);
+		// Create and enable the attribute for the normals
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(standard_vertex), (GLvoid*)offsetof(standard_vertex, m_normal));
+		// Create and enable the attribute for the texels (U/V)
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(standard_vertex), (GLvoid*)offsetof(standard_vertex, m_tex_coords));
+
+		// Unbind the VBO, EBO, and VAO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	void Mesh::setup_full_mesh()
+	{
+		// Create the vertex array ID and bind it
+		glGenVertexArrays(1, &m_VAO);
+		glBindVertexArray(m_VAO);
+
+		// Create the vertex buffer ID and bind it
+		glGenBuffers(1, &m_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		// Attach the vertex data to the VBO
+		glBufferData(GL_ARRAY_BUFFER, sizeof(full_vertex) * m_full_vert.size(), &m_full_vert[0], GL_STATIC_DRAW);
+
+		// Create EBO buffer ID and bind it
+		glGenBuffers(1, &m_EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+		// Attach the indices data to the EBO
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * m_index_count, &m_indices[0], GL_STATIC_DRAW);
+
+		// Create and enable the attribute for the position
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)0);
+		// Create and enable the attribute for the colour
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_colour));
+		// Create and enable the attribute for the normal
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_normal));
+		// Create and enable the attribute for the tangent
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tangent));
+		// Create and enable the attribute for the texels (U/V) 001
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tex_coords001));
+		// Create and enable the attribute for the texels (U/V) 002
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 2, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tex_coords002));
+		// Create and enable the attribute for the texels (U/V) 003
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, sizeof(full_vertex), (GLvoid*)offsetof(full_vertex, m_tex_coords003));
+
+		// Unbind the VBO, EBO, and VAO
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	}
+
+	void Mesh::clear_mesh()
+	{
+		// Clear all the buffers off the graphics card and reset the IDs
+		if (m_VAO)
+		{
+			glDeleteVertexArrays(1, &m_VAO);
+			m_VAO = 0;
+		}
+
+		if (m_VBO)
+		{
+			glDeleteBuffers(1, &m_VBO);
+			m_VBO = 0;
+		}
+
+		if (m_EBO)
+		{
+			glDeleteBuffers(1, &m_EBO);
+			m_EBO = 0;
+		}
+
+		// Reset the index count
+		m_index_count = 0;
+	}
 }

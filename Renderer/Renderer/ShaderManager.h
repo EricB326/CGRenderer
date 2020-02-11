@@ -23,15 +23,41 @@ namespace uciniti
 	class ShaderManager
 	{
 	public:
+		/******************************************************/
+		// Functions
+		/* @brief Base constructor.
+		*/
 		ShaderManager() {}
+		
+		/* @brief Cleans up the shader manager on destruction.
+		*/
 		~ShaderManager() { clean_manager(); }
 
-		void load_shader(const std::string& a_key_name, shader_type a_type_of_shader, const std::string& a_filepath);
+		/* @brief Allows the user to identify shaders they wanna load by
+			string. Calls the Shader class 
+		   @param String of what the user would like to store the shader as
+			in the map.
+		   @param The type of shader being loaded. Ie, vert, frag, etc.
+		   @param String of the filename/location to read data from.
+		*/
+		bool load_shader(const std::string& a_key_name, shader_type a_type_of_shader, const std::string& a_filepath);
+		
+		/* @brief Creates a shader program and attaches shaders via the
+			map keys to it. Finally links it all.
+		   @param Vector of Strings that store the different keys to search
+			within the map when attaching shaders to the program
+		*/
+		bool create_shader_program(const std::string& a_key_name, std::vector<std::string> a_shader_list);
 
-		void create_shader_program(const std::string& a_key_name, std::vector<std::string> a_shader_list);
-
+		/* @brief Uses the shader program for the next draw call.
+		   @param The key of the shader program the user would like to use.
+		*/
 		void use_program(const std::string& a_program_key);
 
+		/* @brief Retrives the program ID.
+		   @param Key of the shader program the user would like to key of.
+		   @return Returns a uint with the ID.
+		*/
 		uint get_program_id(const std::string& a_program_key);
 
 	private:
@@ -49,14 +75,22 @@ namespace uciniti
 
 		/******************************************************/
 		// Functions
+		/* @brief Checks if the key passed already exists within the
+			shader map.
+		   @param The key being searched within the map.
+		   @return True if the key exists, false if not.
+		*/
 		bool does_shader_key_already_exist(const std::string& a_key);
 
-		bool verify_shader_map_key(const std::string& a_key);
-
+		/* @brief Checks if the key passed already exists within the
+			program map.
+		   @param The key being searched within the map.
+		   @return True if the key exists, false if not.
+		*/
 		bool does_program_key_already_exist(const std::string& a_key);
 
-		bool verify_program_map_key(const std::string& a_key);
-
+		/* @brief Cleans the shader manager.
+		*/
 		void clean_manager();
 	};
 }

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <chrono>
 
 /* Graphic includes
 */
@@ -23,14 +24,14 @@
 #include "FreeCamera.h"
 
 GLFWwindow* window;
-FreeCamera* main_camera;
-std::vector<Mesh*> mesh_list;
+uciniti::FreeCamera* main_camera;
+std::vector<uciniti::Mesh*> mesh_list;
 uciniti::ShaderManager* shaders;
 
 void clean_memory();
 bool init_window();
 void create_geometry();
-void create_shaders();
+bool create_shaders();
 
 int main()
 {
@@ -41,14 +42,31 @@ int main()
 	if (!init_window())
 		return -1;
 
+	// Check current time point.
+	auto measure_time_start = std::chrono::high_resolution_clock::now();
 	// Create geometry
 	create_geometry();
+	// Check time point after running the function.
+	auto measure_time_stop = std::chrono::high_resolution_clock::now();
+	// Work out the difference in time points to calculate how long it took the function to run.
+	auto duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
+	printf("Creating geometry took: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
+	// Check current time point.
+	measure_time_start = std::chrono::high_resolution_clock::now();
 	// Create shaders
-	create_shaders();
+	if (!create_shaders())
+	{
+		printf("ERROR: create_shaders() call! Failed to create shader. See console for output.\n");
+	}
+	// Check time point after running the function.
+	measure_time_stop = std::chrono::high_resolution_clock::now();
+	// Work out the difference in time points to calculate how long it took the function to run.
+	duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
+	printf("Creating shaders took: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
 	/*** Camera ***/
-	main_camera = new FreeCamera();
+	main_camera = new uciniti::FreeCamera();
 	main_camera->set_perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.01f, 100.0f);
 	main_camera->set_look_at(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 model = glm::mat4(1.0f);
@@ -200,21 +218,29 @@ void create_geometry()
 						 2, 6, 7, 7, 3, 2 }; // Top face
 
 	/*** Create and 'load' floor mesh ***/
-	Mesh* floor_object = new Mesh(floor_verts, floor_indices, 24, 6, BASE_VERTEX);
+	uciniti::Mesh* floor_object = new uciniti::Mesh(floor_verts, floor_indices, 24, 6, vertex_type::BASE_VERTEX);
 	mesh_list.push_back(floor_object);
-	Mesh* cube_object = new Mesh(vertices, indices, 48, 36, BASE_VERTEX);
+	uciniti::Mesh* cube_object = new uciniti::Mesh(vertices, indices, 48, 36, vertex_type::BASE_VERTEX);
 	mesh_list.push_back(cube_object);
 }
 
-void create_shaders()
+bool create_shaders()
 {
 	/*** Make Shaders ***/
 	shaders = new uciniti::ShaderManager();
 
-	shaders->load_shader("simple_vert", shader_type::VERTEX, "..//Shaders//simple_vert.glsl");
-	shaders->load_shader("simple_frag", shader_type::FRAGMENT, "..//Shaders//simple_frag.glsl");
+	// Load shaders.
+	if (!shaders->load_shader("simple_vert", shader_type::VERTEX, "..//Shaders//simple_vert.glsl"))
+		return false;
+	if (!shaders->load_shader("simple_frag", shader_type::FRAGMENT, "..//Shaders//simple_frag.glsl"))
+		return false;
 
-	shaders->create_shader_program("simple_program", {"simple_vert", "simple_frag"});
+	// Create programs.
+	if (!shaders->create_shader_program("simple_program", { "simple_vert", "simple_frag" }))
+		return false;
+
+	// Return true, successfully created shaders.
+	return true;
 }
 
 void clean_memory()
