@@ -5,257 +5,158 @@
 #include <iostream>
 #include <sstream>
 
-bool ShaderManager::load_from_file(const std::string a_shader_name, const std::string& a_filename, shader_type a_type)
+namespace uciniti
 {
-	// Read the code from the file
-	std::string shader_string;
-	if (read_file_data(a_filename, shader_string))
+	void ShaderManager::load_shader(const std::string& a_key_name, shader_type a_type_of_shader, const std::string& a_filepath)
 	{
-		// Switch what type of shader is being created based
-		// on what the user passed.
-		switch (a_type)
-		{
-			case shader_type::VERTEX:
-			{
-				// Store the users passed name as the key for the
-				// shader ID passed back from the GPU.
-				m_shader_list[a_shader_name] = create_shader(shader_string, GL_VERTEX_SHADER);
-				// Verify the created shader was successfully mapped to the shader list map.
-				mapping_check(a_shader_name);
-				return true;
-			}
-			case shader_type::TESSELLATION_EVALUATION:
-			{
-				// @see case shader_type::VERTEX:
-				m_shader_list[a_shader_name] = create_shader(shader_string, GL_TESS_EVALUATION_SHADER);
-				mapping_check(a_shader_name);
-				return true;
-			}
-			case shader_type::TESSELLATION_CONTROL:
-			{
-				// @see case shader_type::VERTEX:
-				m_shader_list[a_shader_name] = create_shader(shader_string, GL_TESS_CONTROL_SHADER);
-				mapping_check(a_shader_name);
-				return true;
-			}
-			case shader_type::GEOMETRY:
-			{
-				// @see case shader_type::VERTEX:
-				m_shader_list[a_shader_name] = create_shader(shader_string, GL_GEOMETRY_SHADER);
-				mapping_check(a_shader_name);
-				return true;
-			}
-			case shader_type::FRAGMENT:
-			{
-				// @see case shader_type::VERTEX:
-				m_shader_list[a_shader_name] = create_shader(shader_string, GL_FRAGMENT_SHADER);
-				mapping_check(a_shader_name);
-				return true;
-			}
-			default:
-			{
-				printf("Shader type passed is invalid!\n");
-				break;
-			}
-		}
-	}
-
-	return false;
-}
-
-void ShaderManager::create_shader_program(const std::vector<std::string>& a_key_list)
-{
-	// Create the empty shader program.
-	m_shader_program_id = glCreateProgram();
-
-	// Verify the shader program was successfully made.
-	if (!m_shader_program_id)
-	{
-		printf("Creating shader program failed!\n");
-		return;
-	}
-
-	// Attach the shaders.
-	for (size_t i = 0; i < a_key_list.size(); i++)
-	{
-		// Attach each shader passed to the program.
-		GLuint shader_to_attach = get_shader(a_key_list.at(i));
-
-		// -1 represent an error thrown by get_shader().
-		if (shader_to_attach == -1)
-		{
+		// If the shader already exists, return.
+		if (does_shader_key_already_exist(a_key_name))
 			return;
-		}
-
-		glAttachShader(m_shader_program_id, shader_to_attach);
+	
+		// Create and load the desired shader.
+		Shader* new_mapped_shader = new Shader();
+		new_mapped_shader->load_from_file(a_type_of_shader, a_filepath);
+	
+		// Create a new map key with the created shader.
+		m_shader_list[a_key_name] = new_mapped_shader;
 	}
 
-	// Link the program.
-	glLinkProgram(m_shader_program_id);
-
-	// Check for linking errors.
-	GLint success = GL_FALSE;
-	glGetProgramiv(m_shader_program_id, GL_LINK_STATUS, &success);
-
-	if (!success)
+	void ShaderManager::create_shader_program(const std::string& a_key_name, std::vector<std::string> a_shader_list)
 	{
-		// Get the length of the error.
-		GLint log_length = 0;
-		glGetProgramiv(m_shader_program_id, GL_INFO_LOG_LENGTH, &log_length);
-		// Create the error buffer.
-		char* log = new char[log_length];
-		// Copy the error from the buffer.
-		glGetProgramInfoLog(m_shader_program_id, log_length, 0, log);
+		// If the program already exists, return.
+		if (does_program_key_already_exist(a_key_name))
+			return;
 
-		// Create the error message.
-		std::string error_message(log);
-		error_message += "SHADER_FAILED_TO_COMPILE";
-		printf(error_message.c_str());
+		// Create the new shader program.
+		ShaderProgram* new_mapped_program = new ShaderProgram;
+		std::vector<uint> shader_id_list;
 
-		// Clean up.
-		delete[] log;
-	}
-}
-
-uint ShaderManager::get_shader(const std::string& a_key)
-{
-	// Using the .find() search for the key passed through.
-	// The iterator stores the address of the key value pair.
-	m_shader_list_iterator = m_shader_list.find(a_key);
-
-	// If we reached the end of the m_shader_list, the key was
-	// not found in the map.
-	if (m_shader_list_iterator == m_shader_list.end())
-	{
-		printf("\nKey: '%s' was not found! Perhaps verify spelling?\n", a_key.c_str());
-
-		// Return error value.
-		return -1;
-	}
-	else
-	{
-		printf("\nKey passed was present: %s contains the shader ID: %i\n", m_shader_list_iterator->first.c_str(), m_shader_list_iterator->second);
-
-		// Return the second part of the map, in this case the shader ID.
-		return m_shader_list_iterator->second;
-	}
-}
-
-void ShaderManager::use_shader()
-{
-	// Check that the shader program ID has been created
-	if (!m_shader_program_id)
-	{
-		printf("Error when attempting to use shader! Shader has no ID!\n");
-		return;
-	}
-
-	glUseProgram(m_shader_program_id);
-}
-
-void ShaderManager::clean_shader()
-{
-	// Delete the program off the graphics card and set the ID to zero
-	if (m_shader_program_id)
-	{
-		glDeleteProgram(m_shader_program_id);
-		m_shader_program_id = 0;
-	}
-}
-
-GLuint ShaderManager::create_shader(const std::string& const a_shader_data, GLenum a_type)
-{
-	// Create the individual id to be returned.
-	GLuint shader_to_create_id = glCreateShader(a_type);
-
-	// Convert the shader data to c char*.
-	const char* shader_data = a_shader_data.c_str();
-	// Pass the char* shader_data to the shader location.
-	glShaderSource(shader_to_create_id, 1, (const GLchar**)&shader_data, 0);
-	// Build the shader.
-	glCompileShader(shader_to_create_id);
-
-	// Check for any errors when creating the shader.
-	GLint success = GL_FALSE;
-	// Get the information of if we were successful or not.
-	glGetShaderiv(shader_to_create_id, GL_COMPILE_STATUS, &success);
-	// Check the result.
-	if (!success)
-	{
-		// Get the length of the error.
-		GLint log_length = 0;
-		glGetShaderiv(shader_to_create_id, GL_INFO_LOG_LENGTH, &log_length);
-		// Create the error buffer.
-		char* log = new char[log_length];
-		// Copy the error from the buffer.
-		glGetShaderInfoLog(shader_to_create_id, log_length, 0, log);
-
-		// Create the error message.
-		std::string error_message(log);
-		error_message += "SHADER_FAILED_TO_COMPILE";
-		printf(error_message.c_str());
-
-		// Clean up.
-		delete[] log;
-
-		// Return error value
-		return -1;
-	}
-
-	// Successful creation of the shader
-	return shader_to_create_id;
-}
-
-bool ShaderManager::read_file_data(const std::string& a_filename, std::string& a_shader_buffer)
-{
-	// Open the file stream.
-	std::ifstream in_file_stream(a_filename.c_str(), std::ifstream::in);
-
-	// Verify the file exists by checking if the file stream successfully opened it.
-	std::stringstream string_stream;
-	if (in_file_stream.is_open())
-	{
-		// Verify the file is not empt and there is content to be read.
-		if (file_is_empty(in_file_stream))
+		// Loop through each identifier.
+		for (size_t i = 0; i < a_shader_list.size(); i++)
 		{
-			// Warn the user of the lack of content.
-			printf("Contents of shader file \%s\ is empty!\nHave you written any shader code?", a_filename.c_str());
-			return false;
+			// Verify there is a shader at the identifier passed.
+			if (!verify_shader_map_key(a_shader_list[i]))
+				return;
+
+			// Push into the uint vector the uint mapped with the identifier passed.
+			shader_id_list.push_back(m_shader_list.at(a_shader_list[i])->get_shader_id());
 		}
 
-		// Read the data from the file stream to the string stream.
-		string_stream << in_file_stream.rdbuf();
-		// Send the read data from the string stream to the referenced shader buffer.
-		a_shader_buffer = string_stream.str();
-		// Close the file.
-		in_file_stream.close();
+		// Verify there are shader ID's to pass.
+		if (shader_id_list.size() <= 0)
+		{
+			printf("Could not find any ID's when creating shader program!\n");
+		}
 
-		// Successful file data transfer
-		return true; 
+		// Create the shader program.
+		new_mapped_program->create_shader_program(shader_id_list);
+
+		// Map the ShaderProgram* to the program map with the key name given.
+		m_program_list[a_key_name] = new_mapped_program;
 	}
 
-	// File failed to open
-	printf("Failed to open shader file \%s\!\n", a_filename.c_str());
-	return false;
-}
+	void ShaderManager::use_program(const std::string& a_program_key)
+	{
+		// Verify the program key provided.
+		if (!verify_program_map_key(a_program_key))
+			return;
 
-bool ShaderManager::file_is_empty(std::ifstream& a_file_content)
-{
-	// Check if the next character is the end of the file, if the next
-	// character is, than return true. We are at the end.
-	return a_file_content.peek() == std::ifstream::traits_type::eof();
-}
+		m_program_list.at(a_program_key)->use_program();
+	}
 
-void ShaderManager::mapping_check(const std::string& a_key)
-{
-	// Using the .find() search for the key passed through.
-	// The iterator stores the address of the key value pair.
-	m_shader_list_iterator = m_shader_list.find(a_key);
+	uint ShaderManager::get_program_id(const std::string& a_program_key)
+	{
+		return m_program_list.at(a_program_key)->get_program_id();
+	}
+	
+	bool ShaderManager::does_shader_key_already_exist(const std::string& a_key)
+	{
+		// Using the .find() search for the key passed through.
+		// The iterator stores the address of the key value pair.
+		auto shader_list_iterator = m_shader_list.find(a_key);
+	
+		// If we reached the end of the m_shader_list, the key was
+		// not found in the map.
+		if (shader_list_iterator == m_shader_list.end())
+			return false; // Return false, shader doesn't exist.
+		else
+		{
+			// Shader key was found.
+			printf("\nKey: '%s' already exists in shader map list!\n", a_key.c_str());
+			return true;
+		}
+	}
 
-	// If we reached the end of the m_shader_list, the key was
-	// not found in the map.
-	if (m_shader_list_iterator == m_shader_list.end())
-		printf("Mapping was unsuccessful!\n");
-	else
-		printf("Successfully mapped shader ID: %i to shader name (key): %s\n", m_shader_list_iterator->second, m_shader_list_iterator->first.c_str());
+	bool ShaderManager::verify_shader_map_key(const std::string& a_key)
+	{
+		// Using the .find() search for the key passed through.
+		// The iterator stores the address of the key value pair.
+		auto shader_list_iterator = m_shader_list.find(a_key);
+
+		// If we reached the end of the m_shader_list, the key was
+		// not found in the map.
+		if (shader_list_iterator == m_shader_list.end())
+		{
+			printf("\nKey: '%s' does not exist in shader map list!\n", a_key.c_str());
+			return false; // Return false, key not verified.
+		}
+		else
+		{
+			// Key was found and verified.
+			return true;
+		}
+	}
+
+	bool ShaderManager::does_program_key_already_exist(const std::string& a_key)
+	{
+		// Using the .find() search for the key passed through.
+		// The iterator stores the address of the key value pair.
+		auto program_list_iterator = m_program_list.find(a_key);
+
+		// If we reached the end of the m_program_list, the key was
+		// not found in the map.
+		if (program_list_iterator == m_program_list.end())
+			return false; // Return false, program doesn't exist.
+		else
+		{
+			// Shader key was found.
+			printf("\nKey: '%s' already exists in program map list!\n", a_key.c_str());
+			return true;
+		}
+	}
+
+	bool ShaderManager::verify_program_map_key(const std::string& a_key)
+	{
+		// Using the .find() search for the key passed through.
+		// The iterator stores the address of the key value pair.
+		auto program_list_iterator = m_program_list.find(a_key);
+
+		// If we reached the end of the m_program_list, the key was
+		// not found in the map.
+		if (program_list_iterator == m_program_list.end())
+		{
+			printf("\nKey: '%s' does not exist in program map list!\n", a_key.c_str());
+			return false; // Return false, key not verified.
+		}
+		else
+		{
+			// Key was found and verified.
+			return true;
+		}
+	}
+
+	void ShaderManager::clean_manager()
+	{
+		// Delete Shader* pointers
+		for (std::pair<std::string, Shader*> this_pair : m_shader_list)
+		{
+			delete this_pair.second;
+		}
+
+		// Delete ShaderProgram* pointers
+		for (std::pair<std::string, ShaderProgram*> this_pair : m_program_list)
+		{
+			delete this_pair.second;
+		}
+	}
 }

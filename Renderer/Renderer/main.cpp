@@ -25,7 +25,7 @@
 GLFWwindow* window;
 FreeCamera* main_camera;
 std::vector<Mesh*> mesh_list;
-std::vector<ShaderManager*> shader_list;
+uciniti::ShaderManager* shaders;
 
 void clean_memory();
 bool init_window();
@@ -58,7 +58,6 @@ int main()
 
 	glm::vec4 colour;
 
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0;
 
@@ -78,19 +77,21 @@ int main()
 		main_camera->update(delta_time);
 
 		// orbit
-		//m_main_camera->set_look_at(glm::vec3(glm::sin(current_time) * 7, 3, glm::cos(current_time) * 7), glm::vec3(0), glm::vec3(0, 1, 0));
+		main_camera->set_look_at(glm::vec3(glm::sin(current_time) * 7, 3, glm::cos(current_time) * 7), glm::vec3(0), glm::vec3(0, 1, 0));
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
 		// User created shader program
-		shader_list[0]->use_shader();
+		shaders->use_program("simple_program");
 
-		uniform_projection_location = glGetUniformLocation(shader_list[0]->get_program(), "projection_view_matrix");
-		uniform_model_location = glGetUniformLocation(shader_list[0]->get_program(), "model_matrix");
-		uniform_colour_location = glGetUniformLocation(shader_list[0]->get_program(), "colour");
+		uniform_projection_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "projection_view_matrix");
+		uniform_model_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "model_matrix");
+		uniform_colour_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "colour");
 
 		glUniformMatrix4fv(uniform_projection_location, 1, false, glm::value_ptr(main_camera->get_projection_view()));
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
@@ -101,9 +102,12 @@ int main()
 
 		mesh_list[0]->render_mesh();
 
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glLineWidth(5.0f);
+
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
-		//model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.5f, 1.0f, 0.0f));
+		model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0f));
+		model = glm::rotate(model, current_time, glm::vec3(0.5f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 2.0f));
 		colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
@@ -205,13 +209,12 @@ void create_geometry()
 void create_shaders()
 {
 	/*** Make Shaders ***/
-	ShaderManager* shader_to_push = new ShaderManager();
+	shaders = new uciniti::ShaderManager();
 
-	shader_to_push->load_from_file("simple_vert", "..//Shaders//simple_vert.glsl", shader_type::VERTEX);
-	shader_to_push->load_from_file("simple_frag", "..//Shaders//simple_frag.glsl", shader_type::FRAGMENT);
+	shaders->load_shader("simple_vert", shader_type::VERTEX, "..//Shaders//simple_vert.glsl");
+	shaders->load_shader("simple_frag", shader_type::FRAGMENT, "..//Shaders//simple_frag.glsl");
 
-	shader_to_push->create_shader_program({ "simple_vert", "simple_frag" });
-	shader_list.push_back(shader_to_push);
+	shaders->create_shader_program("simple_program", {"simple_vert", "simple_frag"});
 }
 
 void clean_memory()
@@ -228,11 +231,6 @@ void clean_memory()
 	}
 	mesh_list.clear();
 
-	// Delete each shader in shader_list
-	for (size_t i = 0; i < shader_list.size(); i++)
-	{
-		delete shader_list[i];
-		shader_list[i] = nullptr;
-	}
-	shader_list.clear();
+	// Delete each shaders
+	delete shaders;
 }
