@@ -140,6 +140,39 @@ namespace uciniti
 		render_mesh();
 	}
 
+	bool Mesh::load_obj(const char* a_filepath, bool a_load_textures, bool a_filp_textures_v)
+	{
+		// Store the seperate objects and their faces.
+		std::vector<tinyobj::shape_t> shapes;
+		// Materials and textures per face.
+		std::vector<tinyobj::material_t> materials;
+		// Contain errors that occur while loading files
+		std::string err;
+
+		std::string file = a_filepath;
+		std::string folder = file.substr(0, file.find_last_of('/') + 1);
+
+		if (!tinyobj::LoadObj(shapes, materials, err, a_filepath, folder.c_str()))
+		{
+			printf("\nERROR: load_obj() call. Failed to load file '%s'!.\n", a_filepath);
+			printf("%s\n", err.c_str());
+			return true;
+		}
+
+		// Pass data to the correct struct class
+		for (const auto& shape : shapes)
+		{
+			standard_vertex vertex = {};
+
+			//if (!shape.mesh.positions.empty())
+			//{
+			//	vertex.m_position = glm::vec3((3 * tinyobj::ver))
+			//}
+		}
+
+		return false;
+	}
+
 	void Mesh::setup_base_mesh()
 	{
 		// Create the vertex array ID and bind it

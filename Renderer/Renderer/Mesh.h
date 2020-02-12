@@ -14,6 +14,11 @@
 */
 #include "glm.hpp"
 
+/* .OBJ importing includes
+*/
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "..\Dependencies\tiny_obj\tiny_obj_loader.h"
+
 /* User defined includes
 */
 #include "common.h"
@@ -109,6 +114,8 @@ namespace uciniti
 		   @param The number of indices in the index array
 		   @param The type of vertex being created, 0 = BASIC_VERTEX | 1 = STANDARD_VERTEX (see "common.h").
 		*/
+		Mesh();
+		Mesh(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
 		Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type);
 		~Mesh();
 
@@ -125,6 +132,14 @@ namespace uciniti
 			calls render_mesh().
 		*/
 		void draw();
+
+		/* @brief Handles calling tinyobj to import .obj files.
+		   @param File path of the .obj file.
+		   @param Bool on if textures should be loaded.
+		   @param Should V textures be flipped. 
+		   @return False if successfully loaded, true if error occured.
+		*/
+		bool load_obj(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
 
 	private:
 		/******************************************************/
@@ -144,8 +159,8 @@ namespace uciniti
 		std::vector<standard_vertex> m_standard_vert;
 
 		/* @brief Declareation of the full_vertex struct, to
-		prepare for initialized data.
-	*/
+			prepare for initialized data.
+		*/
 		std::vector<full_vertex> m_full_vert;
 
 		/* @brief The data passed through from the index
