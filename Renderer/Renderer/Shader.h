@@ -58,7 +58,7 @@ namespace uciniti
 		/* @brief Retrives the shader id.
 		   @return Returns a unit of the shader id
 		*/
-		uint get_shader_id() { return m_shader_id; }
+		inline uint get_shader_id() { return m_shader_id; }
 
 	private:
 		/******************************************************/

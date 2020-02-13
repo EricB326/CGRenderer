@@ -13,7 +13,7 @@ namespace uciniti
 		set_look_at(a_position, a_look_at_point, glm::vec3(0.0f, 1.0f, 0.0f));
 	}
 
-	void FreeCamera::update(float a_delta_time)
+	void FreeCamera::update(double a_delta_time)
 	{
 		// Grab window context.
 		auto glfw_window = glfwGetCurrentContext();
@@ -24,7 +24,7 @@ namespace uciniti
 		mouse_controls(glfw_window, a_delta_time);
 	}
 
-	void FreeCamera::keyboard_controls(GLFWwindow* a_window, float a_delta_time)
+	void FreeCamera::keyboard_controls(GLFWwindow* a_window, double a_delta_time)
 	{
 		// Only update camera if input is received.
 		bool input_flag = false;
@@ -72,12 +72,12 @@ namespace uciniti
 		// Apply the scaled translation to the cameras position, if there was input.
 		if (input_flag)
 		{
-			set_position(glm::vec4(get_world_transform(), 0.0f) + (glm::vec4(glm::normalize(displacement), 0.0f) * m_camera_movement_speed * a_delta_time));
+			set_position(glm::vec4(get_world_transform(), 0.0f) + (glm::vec4(glm::normalize(displacement), 0.0f) * m_camera_movement_speed * (float)a_delta_time));
 			update_matrices();
 		}
 	}
 
-	void FreeCamera::mouse_controls(GLFWwindow* a_window, float a_delta_time)
+	void FreeCamera::mouse_controls(GLFWwindow* a_window, double a_delta_time)
 	{
 		/*** MOUSE CONTROL ***/
 		double cursor_position_x;
@@ -87,8 +87,8 @@ namespace uciniti
 		glfwGetCursorPos(a_window, &cursor_position_x, &cursor_position_y);
 
 		// Calculate the offset from the screens centre this frame.
-		float delta_x = cursor_position_x - (WIDTH * 0.5);
-		float delta_y = cursor_position_y - (HEIGHT * 0.5);
+		double delta_x = cursor_position_x - (WIDTH * 0.5);
+		double delta_y = cursor_position_y - (HEIGHT * 0.5);
 
 		// Move the cursor back to the centre of the render / window.
 		glfwSetCursorPos(a_window, WIDTH * 0.5, HEIGHT * 0.5);
@@ -96,8 +96,8 @@ namespace uciniti
 		// Set the delta_x/y to zero on the first update call (startup of application).
 		if (m_first_mouse_call)
 		{
-			delta_x = 0.0f;
-			delta_y = 0.0f;
+			delta_x = 0.0;
+			delta_y = 0.0;
 			m_first_mouse_call = false;
 		}
 

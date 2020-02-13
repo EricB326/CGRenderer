@@ -14,11 +14,6 @@
 */
 #include "glm.hpp"
 
-/* .OBJ importing includes
-*/
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "..\Dependencies\tiny_obj\tiny_obj_loader.h"
-
 /* User defined includes
 */
 #include "common.h"
@@ -44,11 +39,19 @@ struct standard_vertex
 {
 	/* @brief Position of vertex.
 	*/
-	glm::vec3 m_position;
+	glm::vec4 m_position;
 
 	/* @brief Normals of vertex.
 	*/
-	glm::vec3 m_normal;
+	glm::vec4 m_normal;
+
+	/* @brief Tangents of vertex.
+	*/
+	glm::vec4 m_tangent;
+
+	/* @brief Bitangents of vertex.
+	*/
+	glm::vec4 m_bitangent;
 
 	/* @brief Texture coords of vertex.
 	*/
@@ -106,6 +109,9 @@ namespace uciniti
 	public:
 		/******************************************************/
 		// Functions
+		Mesh();
+		//Mesh(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
+
 		/* @brief Constructor zeros all values with no params.
 			Resulting in no data being passed to the vertex structs.
 		   @param The data stored in the vertices array.
@@ -114,10 +120,8 @@ namespace uciniti
 		   @param The number of indices in the index array
 		   @param The type of vertex being created, 0 = BASIC_VERTEX | 1 = STANDARD_VERTEX (see "common.h").
 		*/
-		Mesh();
-		Mesh(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
 		Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type);
-		~Mesh();
+		~Mesh() { clear_mesh(); }
 
 		/* @brief Renders the prepared mesh data
 		*/
@@ -137,7 +141,7 @@ namespace uciniti
 		   @param File path of the .obj file.
 		   @param Bool on if textures should be loaded.
 		   @param Should V textures be flipped. 
-		   @return False if successfully loaded, true if error occured.
+		   @return True if successfully loaded, false if error occured.
 		*/
 		bool load_obj(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
 
@@ -166,7 +170,7 @@ namespace uciniti
 		/* @brief The data passed through from the index
 			array.
 		*/
-		uint* m_indices;
+		const uint* m_indices;
 
 		/* @brief Number of indicies passed to
 			the class.
@@ -178,8 +182,16 @@ namespace uciniti
 		*/
 		GLsizei m_vert_count;
 
+		/* @brief Checks to see if the mesh is currently occupied
+			by another model. True if empty, false if occupied.
+		*/
+		bool m_empty_mesh;
+
 		/******************************************************/
 		// Functions
+		void calculate_vertex_tangents(std::vector<standard_vertex>& a_vertices, const uint* a_indices);
+
+
 		/* @brief Initializes all the base vertex array/buffer objects
 			to be ready for rendering the mesh.
 		*/

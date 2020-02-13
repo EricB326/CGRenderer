@@ -30,7 +30,7 @@ uciniti::ShaderManager* shaders;
 
 void clean_memory();
 bool init_window();
-void create_geometry();
+bool create_geometry();
 bool create_shaders();
 
 int main()
@@ -44,31 +44,39 @@ int main()
 
 	// Check current time point.
 	auto measure_time_start = std::chrono::high_resolution_clock::now();
+	printf("Creating geometry... ");
 	// Create geometry
-	create_geometry();
+	if (!create_geometry())
+	{
+		printf("ERROR: create_geometry() call. Failed to create shader. See console for output.\n");
+
+		clean_memory();
+		return -1;
+	}
 	// Check time point after running the function.
 	auto measure_time_stop = std::chrono::high_resolution_clock::now();
 	// Work out the difference in time points to calculate how long it took the function to run.
 	auto duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
-	printf("Creating geometry took: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
+	printf("Time elapsed: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
-	// Check current time point.
 	measure_time_start = std::chrono::high_resolution_clock::now();
 	// Create shaders
+	printf("Creating shaders... ");
 	if (!create_shaders())
 	{
-		printf("ERROR: create_shaders() call! Failed to create shader. See console for output.\n");
+		printf("ERROR: create_shaders() call. Failed to create shader. See console for output.\n");
+
+		clean_memory();
+		return -2;
 	}
-	// Check time point after running the function.
 	measure_time_stop = std::chrono::high_resolution_clock::now();
-	// Work out the difference in time points to calculate how long it took the function to run.
 	duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
-	printf("Creating shaders took: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
+	printf("Time elapsed: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
 	/*** Camera ***/
 	main_camera = new uciniti::FreeCamera();
 	main_camera->set_perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.01f, 100.0f);
-	main_camera->set_look_at(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	main_camera->set_look_at(glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 model = glm::mat4(1.0f);
 
 	/*** Background colour ***/
@@ -80,13 +88,13 @@ int main()
 	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0;
 
 	// Delta time
-	GLfloat delta_time = 0.0f;
-	GLfloat last_time = 0.0f;
+	double delta_time = 0.0f;
+	double last_time = 0.0f;
 
 	/*** Game Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
-		GLfloat current_time = glfwGetTime();
+		double current_time = glfwGetTime();
 		delta_time = current_time - last_time;
 		last_time = current_time;
 
@@ -95,7 +103,7 @@ int main()
 		main_camera->update(delta_time);
 
 		// orbit
-		main_camera->set_look_at(glm::vec3(glm::sin(current_time) * 7, 3, glm::cos(current_time) * 7), glm::vec3(0), glm::vec3(0, 1, 0));
+		//main_camera->set_look_at(glm::vec3(glm::sin(current_time) * 7, 3, glm::cos(current_time) * 7), glm::vec3(0), glm::vec3(0, 1, 0));
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
@@ -112,7 +120,7 @@ int main()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
 		colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
@@ -121,18 +129,17 @@ int main()
 		mesh_list[0]->render_mesh();
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glLineWidth(5.0f);
 
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 1.5f, 0.0f));
-		model = glm::rotate(model, current_time, glm::vec3(0.5f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 2.0f));
+		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+		//model = glm::rotate(model, current_time, glm::vec3(0.5f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
 		colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
 		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
 
-		mesh_list[1]->render_mesh();
+		mesh_list[2]->render_mesh();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -184,7 +191,7 @@ bool init_window()
 	return true;
 }
 
-void create_geometry()
+bool create_geometry()
 {
 	/*** Mesh data ***/
 	// Large floor plane points
@@ -222,6 +229,15 @@ void create_geometry()
 	mesh_list.push_back(floor_object);
 	uciniti::Mesh* cube_object = new uciniti::Mesh(vertices, indices, 48, 36, vertex_type::BASE_VERTEX);
 	mesh_list.push_back(cube_object);
+
+	uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
+	bool loaded = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
+	if (!loaded)
+		return false;
+
+	mesh_list.push_back(stanford_bunny);
+
+	return true;
 }
 
 bool create_shaders()

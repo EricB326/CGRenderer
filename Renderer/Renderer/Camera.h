@@ -29,7 +29,7 @@ namespace uciniti
 
 		/* TODO: Add something to blank update.
 		*/
-		virtual void update(float a_delta_time = 0) {};
+		virtual void update(double a_delta_time = 0) {};
 
 		/* @brief Sets the camera to a perspective type.
 		   @param Field of view of the camera (in radians).
@@ -63,62 +63,62 @@ namespace uciniti
 		/* @brief Retrives the world matrix.
 		   @param Returns a mat4 of the world transform matrix.
 		*/
-		glm::mat4 get_world_matrix() { return m_world_transform; }
+		inline glm::mat4 get_world_matrix() { return m_world_transform; }
 
 		/* @brief Retrives the world right vector.
 		   @param Returns vec3 of worlds transform matrix index 0 (right vector coloum).
 		*/
-		glm::vec3 get_world_right() { return m_world_transform[0]; }
+		inline glm::vec3 get_world_right() { return m_world_transform[0]; }
 
 		/* @brief Retrives the world up vector.
 		   @param Returns vec3 of worlds transform matrix index 1 (up vector coloum).
 		*/
-		glm::vec3 get_world_up() { return m_world_transform[1]; }
+		inline glm::vec3 get_world_up() { return m_world_transform[1]; }
 
 		/* @brief Retrives the world foward vector.
 		   @param Returns vec3 of worlds transform matrix index 2 (foward vector coloum).
 		*/
-		glm::vec3 get_world_foward() { return m_world_transform[2]; }
+		inline glm::vec3 get_world_foward() { return m_world_transform[2]; }
 
 		/* @brief Retrives the world transform vector.
 		   @param Returns vec3 of worlds transform matrix index 3 (transform vector coloum).
 		*/
-		glm::vec3 get_world_transform() { return m_world_transform[3]; }
+		inline glm::vec3 get_world_transform() { return m_world_transform[3]; }
 
 		/* @brief Retrives the view matrix.
 		   @param Returns a mat4 of the view transform matrix.
 		*/
-		glm::mat4 get_view_matrix() { return m_view_transform; }
+		inline glm::mat4 get_view_matrix() { return m_view_transform; }
 
 		/* @brief Retrives the view right vector.
 		   @param Returns vec3 of views transform matrix index 0 (right vector coloum).
 		*/
-		glm::vec3 get_view_right() { return m_view_transform[0]; }
+		inline glm::vec3 get_view_right() { return m_view_transform[0]; }
 
 		/* @brief Retrives the view up vector.
 		   @param Returns vec3 of views transform matrix index 0 (up vector coloum).
 		*/
-		glm::vec3 get_view_up() { return m_view_transform[1]; }
+		inline glm::vec3 get_view_up() { return m_view_transform[1]; }
 
 		/* @brief Retrives the view forward vector.
 		   @param Returns vec3 of views transform matrix index 0 (forward vector coloum).
 		*/
-		glm::vec3 get_view_foward() { return m_view_transform[2]; }
+		inline glm::vec3 get_view_foward() { return m_view_transform[2]; }
 
 		/* @brief Retrives the view transform vector.
 		   @param Returns vec3 of views transform matrix index 3 (transform vector coloum).
 		*/
-		glm::vec3 get_view_transform() { return m_view_transform[3]; }
+		inline glm::vec3 get_view_transform() { return m_view_transform[3]; }
 
 		/* @brief Retrives the projection matrix.
 		   @param Returns a mat4 of the projection transform matrix.
 		*/
-		glm::mat4 get_projection() { return m_projection_transform; }
+		inline glm::mat4 get_projection() { return m_projection_transform; }
 
 		/* @brief Retrives the projection view (p * v) matrix.
 		   @param Returns a mat4 of the projection view transform matrix.
 		*/
-		glm::mat4 get_projection_view() { return m_projection_view_transform; }
+		inline glm::mat4 get_projection_view() { return m_projection_view_transform; }
 
 	protected:
 		/******************************************************/

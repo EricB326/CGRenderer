@@ -39,7 +39,7 @@ namespace uciniti
 		   @param Float holding the change in time (delta time)
 			since the last call.
 		*/
-		void update(float a_delta_time) override;
+		virtual void update(double a_delta_time) override;
 
 		/* @brief Allows the user to modify how fast the camera
 			moves around the scene.
@@ -81,7 +81,7 @@ namespace uciniti
 		   @param Float holding the change in time (delta time)
 			since the last call.
 		*/
-		void keyboard_controls(GLFWwindow* a_window, float a_delta_time);
+		void keyboard_controls(GLFWwindow* a_window, double a_delta_time);
 
 		/* @brief Checks mouse input from the user and stores the
 			delta x and y. Using the aforemention, rotates accordingly.
@@ -89,7 +89,7 @@ namespace uciniti
 		   @param Float holding the change in time (delta time)
 			since the last call.
 		*/
-		void mouse_controls(GLFWwindow* a_window, float a_delta_time);
+		void mouse_controls(GLFWwindow* a_window, double a_delta_time);
 	};
 }
 

@@ -58,7 +58,7 @@ namespace uciniti
 		   @param Key of the shader program the user would like to key of.
 		   @return Returns a uint with the ID.
 		*/
-		uint get_program_id(const std::string& a_program_key);
+		inline uint get_program_id(const std::string& a_program_key) { return m_program_list.at(a_program_key)->get_program_id(); }
 
 	private:
 		/******************************************************/

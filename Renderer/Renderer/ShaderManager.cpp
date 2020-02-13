@@ -81,11 +81,6 @@ namespace uciniti
 		m_program_list.at(a_program_key)->use_program();
 	}
 
-	uint ShaderManager::get_program_id(const std::string& a_program_key)
-	{
-		return m_program_list.at(a_program_key)->get_program_id();
-	}
-	
 	bool ShaderManager::does_shader_key_already_exist(const std::string& a_key)
 	{
 		// Using the .find() search for the key passed through.

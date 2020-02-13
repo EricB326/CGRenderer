@@ -43,6 +43,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <chrono>
 
 namespace tinyobj {
 
@@ -882,6 +883,7 @@ bool LoadObj(std::vector<shape_t> &shapes,       // [output]
 
   int maxchars = 8192;                                  // Alloc enough size.
   std::vector<char> buf(static_cast<size_t>(maxchars)); // Alloc enough size.
+  auto measure_time_start = std::chrono::high_resolution_clock::now();
   while (inStream.peek() != -1) {
     inStream.getline(&buf[0], maxchars);
 
@@ -942,6 +944,7 @@ bool LoadObj(std::vector<shape_t> &shapes,       // [output]
       parseFloat2(x, y, token);
       vt.push_back(x);
       vt.push_back(y);
+
       continue;
     }
 
@@ -1117,7 +1120,6 @@ bool LoadObj(std::vector<shape_t> &shapes,       // [output]
 
       tags.push_back(tag);
     }
-
     // Ignore unknown command.
   }
 

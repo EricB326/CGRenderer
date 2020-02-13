@@ -51,7 +51,7 @@ namespace uciniti
 		/* @brief Retrives the shader program ID stored.
 		   @return Unsigned int of the ID from the GPU.
 		*/
-		uint get_program_id() { return m_program_id; }
+		inline uint get_program_id() { return m_program_id; }
 
 	private:
 		/******************************************************/
