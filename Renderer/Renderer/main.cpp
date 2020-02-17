@@ -135,7 +135,7 @@ int main()
 		model = glm::mat4(1.0f);
 		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
 		//model = glm::rotate(model, current_time, glm::vec3(0.5f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.3f, 0.3f, 0.3f));
+		model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));
 		colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
@@ -234,7 +234,8 @@ bool create_geometry()
 
 	// Create loaded .obj model.
 	uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
-	bool loaded = stanford_bunny->load_obj("..//Models//Soulspear//soulspear.obj");
+	bool loaded = stanford_bunny->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
+	//bool loaded = stanford_bunny->load_obj("..//Models//Soulspear//soulspear.obj");
 	//bool loaded = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
 	// Check for success.
 	if (!loaded)

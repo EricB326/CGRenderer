@@ -194,11 +194,6 @@ namespace uciniti
 			m_index_count = shape.mesh.indices.size();
 			m_indices = shape.mesh.indices.data();
 
-			printf("\ntt..%i\n", shape.mesh.indices[72]);
-			printf("tt..%i\n", m_indices[72]);
-
-			printf("\nIndex count..%i\n", m_index_count);
-
 			// Populate the vertex.
 			for (size_t i = 0; i < vert_count; i++)
 			{
@@ -248,7 +243,7 @@ namespace uciniti
 		}
 
 		// Calculate tangent and bitangent for each triangle.
-		for (size_t i = 0; i < m_index_count  - 2; i++)
+		for (size_t i = 0; i < m_index_count - 2; i++)
 		{
 			long index0 = a_indices[i];
 			long index1 = a_indices[i + 1];
@@ -278,7 +273,7 @@ namespace uciniti
 			bitangent[index2] += glm::vec4(b, 0.0f);
 			bitangent[index1] += glm::vec4(b, 0.0f);
 		}
-		printf("calc\n");
+
 		// Orthonormalize each tanget and calculate handedness.
 		for (size_t i = 0; i < vertex_count; i++)
 		{
