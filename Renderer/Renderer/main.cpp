@@ -85,7 +85,7 @@ int main()
 	glm::vec4 colour;
 
 
-	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0;
+	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0, uniform_time_location = 0;
 
 	// Delta time
 	double delta_time = 0.0f;
@@ -114,10 +114,11 @@ int main()
 		uniform_projection_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "projection_view_matrix");
 		uniform_model_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "model_matrix");
 		uniform_colour_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "colour");
+		uniform_time_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "time");
 
 		glUniformMatrix4fv(uniform_projection_location, 1, false, glm::value_ptr(main_camera->get_projection_view()));
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		model = glm::mat4(1.0f);
 		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
@@ -125,10 +126,11 @@ int main()
 
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
 		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
+		glUniform1f(uniform_time_location, (float)current_time);
 
-		mesh_list[0]->render_mesh();
+		//mesh_list[0]->render_mesh();
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		model = glm::mat4(1.0f);
 		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
@@ -194,7 +196,7 @@ bool init_window()
 bool create_geometry()
 {
 	/*** Mesh data ***/
-	// Large floor plane points
+	// Large floor plane points.
 	//								Positions             Colour
 	//							 X      Y       Z      R      G     B
 	GLfloat floor_verts[] = { -10.0f,  0.0f, -10.0f,  0.0f,  0.0f,  0.0f,   // Back Left
@@ -204,7 +206,7 @@ bool create_geometry()
 
 	GLuint floor_indices[] = { 1, 0, 2, 2, 3, 1 };
 
-	// Create the points on a cube
+	// Create the points on a cube.
 	//					        Positions             Colours       
 	//						 X      Y      Z      R      G      B   
 	GLfloat vertices[] = { -1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f,   // Bot left	     -- 0
@@ -216,7 +218,7 @@ bool create_geometry()
 						   -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,   // Back top left  -- 6
 							1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f }; // Back top right -- 7
 
-	// Create the faces of a cube
+	// Create the faces of a cube.
 	GLuint indices[] = { 0, 2, 6, 6, 4, 0,   // Left face
 						 1, 3, 7, 7, 5, 1,   // Right face
 						 4, 6, 7, 7, 5, 4,   // Back face
@@ -230,11 +232,14 @@ bool create_geometry()
 	uciniti::Mesh* cube_object = new uciniti::Mesh(vertices, indices, 48, 36, vertex_type::BASE_VERTEX);
 	mesh_list.push_back(cube_object);
 
+	// Create loaded .obj model.
 	uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
-	bool loaded = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
+	bool loaded = stanford_bunny->load_obj("..//Models//Soulspear//soulspear.obj");
+	//bool loaded = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
+	// Check for success.
 	if (!loaded)
 		return false;
-
+	// Add the model to the list if successful.
 	mesh_list.push_back(stanford_bunny);
 
 	return true;
@@ -261,11 +266,11 @@ bool create_shaders()
 
 void clean_memory()
 {
-	// Delete the camera
+	// Delete the camera.
 	delete main_camera;
 	main_camera = nullptr;
 
-	// Delete each mesh in mesh_list
+	// Delete each mesh in mesh_list.
 	for (size_t i = 0; i < mesh_list.size(); i++)
 	{
 		delete mesh_list[i];
@@ -273,6 +278,6 @@ void clean_memory()
 	}
 	mesh_list.clear();
 
-	// Delete each shaders
+	// Delete each shaders.
 	delete shaders;
 }

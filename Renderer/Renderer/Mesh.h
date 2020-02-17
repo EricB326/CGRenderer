@@ -109,8 +109,12 @@ namespace uciniti
 	public:
 		/******************************************************/
 		// Functions
+		/* @brief Constructor zeros all values with no params.
+		*/
 		Mesh();
-		//Mesh(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
+
+		/**/
+		Mesh(const char* a_filepath, bool a_load_textures = true, bool a_flip_textures = false);
 
 		/* @brief Constructor zeros all values with no params.
 			Resulting in no data being passed to the vertex structs.
@@ -143,7 +147,7 @@ namespace uciniti
 		   @param Should V textures be flipped. 
 		   @return True if successfully loaded, false if error occured.
 		*/
-		bool load_obj(const char* a_filepath, bool a_load_textures = true, bool a_filp_textures_v = false);
+		bool load_obj(const char* a_filepath, bool a_load_textures = true, bool a_flip_textures = false);
 
 	private:
 		/******************************************************/
@@ -189,8 +193,8 @@ namespace uciniti
 
 		/******************************************************/
 		// Functions
+		/**/
 		void calculate_vertex_tangents(std::vector<standard_vertex>& a_vertices, const uint* a_indices);
-
 
 		/* @brief Initializes all the base vertex array/buffer objects
 			to be ready for rendering the mesh.

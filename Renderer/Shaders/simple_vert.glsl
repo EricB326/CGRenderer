@@ -9,7 +9,18 @@ layout (location = 4) in vec2 texture_coords;
 uniform mat4 projection_view_matrix;
 uniform mat4 model_matrix;
 
+uniform float time = 0.0f;
+
+out vec3 outNormals;
+
 void main()
 {
-	gl_Position = (projection_view_matrix * model_matrix) * vec4(local_position);
+	vec4 new_position = local_position;
+	
+	new_position.x += normalize((sin(local_position.y * 3.0f + time * 3.0f) * 0.3f)) 
+					+ (cos(local_position.z * 3.0f + time * 3.0f) * 0.3f);
+					
+	gl_Position = ((projection_view_matrix * model_matrix) * vec4(new_position));
+	
+	outNormals = normals.xyz;
 }

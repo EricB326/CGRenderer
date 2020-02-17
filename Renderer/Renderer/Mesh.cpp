@@ -14,6 +14,12 @@ namespace uciniti
 	{
 	}
 
+	Mesh::Mesh(const char* a_filepath, bool a_load_textures, bool a_flip_textures)
+		: m_VAO(0), m_VBO(0), m_EBO(0), m_indices(0), m_index_count(0), m_vert_count(0), m_empty_mesh(true)
+	{
+		load_obj(a_filepath, a_load_textures, a_flip_textures);
+	}
+
 	Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type)
 		: m_VAO(0), m_VBO(0), m_EBO(0), m_indices(a_indices), m_index_count(a_num_of_indices), m_vert_count(a_num_of_verts), m_empty_mesh(true)
 	{
@@ -166,7 +172,7 @@ namespace uciniti
 
 		std::string file = a_filepath;
 		std::string folder = file.substr(0, file.find_last_of('/') + 1);
-
+		
 		// Check current time point.
 		//auto measure_time_start = std::chrono::high_resolution_clock::now();
 		//printf("Reading '%s'... ", a_filepath);
@@ -176,14 +182,7 @@ namespace uciniti
 			printf("%s\n", err.c_str());
 			return false;
 		}
-		// Check time point after running the function.
-		//auto measure_time_stop = std::chrono::high_resolution_clock::now();
-		//// Work out the difference in time points to calculate how long it took the function to run.
-		//auto duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
-		//printf("Time elapsed: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
-		//measure_time_start = std::chrono::high_resolution_clock::now();
-		//printf("Transfering '%s' data... ", a_filepath);
 		// Pass data to the correct struct class.
 		for (const auto& shape : shapes)
 		{
@@ -195,7 +194,11 @@ namespace uciniti
 			m_index_count = shape.mesh.indices.size();
 			m_indices = shape.mesh.indices.data();
 
-			
+			printf("\ntt..%i\n", shape.mesh.indices[72]);
+			printf("tt..%i\n", m_indices[72]);
+
+			printf("\nIndex count..%i\n", m_index_count);
+
 			// Populate the vertex.
 			for (size_t i = 0; i < vert_count; i++)
 			{
@@ -213,11 +216,9 @@ namespace uciniti
 			// Calculate tangents for normal mapping.
 			if (!shape.mesh.normals.empty() && !shape.mesh.texcoords.empty())
 				calculate_vertex_tangents(m_standard_vert, m_indices);
-		}
-		//measure_time_stop = std::chrono::high_resolution_clock::now();
-		//duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
-		//printf("Time elapsed: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
+			//printf("post calculate tangents\n");
+		}
 
 		// Prepare the mesh for rendering.
 		setup_standard_mesh();
@@ -247,7 +248,7 @@ namespace uciniti
 		}
 
 		// Calculate tangent and bitangent for each triangle.
-		for (size_t i = 0; i < m_index_count; i++)
+		for (size_t i = 0; i < m_index_count  - 2; i++)
 		{
 			long index0 = a_indices[i];
 			long index1 = a_indices[i + 1];
@@ -277,8 +278,7 @@ namespace uciniti
 			bitangent[index2] += glm::vec4(b, 0.0f);
 			bitangent[index1] += glm::vec4(b, 0.0f);
 		}
-
-			std::cout << "here\n";
+		printf("calc\n");
 		// Orthonormalize each tanget and calculate handedness.
 		for (size_t i = 0; i < vertex_count; i++)
 		{
