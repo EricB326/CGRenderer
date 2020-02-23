@@ -46,15 +46,14 @@ namespace uciniti
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		// Pass texture data to buffer.
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
 		// Generate texture mipmaps.
-		glGenerateMipmap(GL_TEXTURE_2D);
+		//glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Unbind texture.
 		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// Successfully loaded the texture.
-		printf("Successfully loaded texture: '%s\n", a_filepath);
 		return true;
 	}
 

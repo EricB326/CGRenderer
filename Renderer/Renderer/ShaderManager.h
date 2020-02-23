@@ -54,6 +54,8 @@ namespace uciniti
 		*/
 		void use_program(const std::string& a_program_key);
 
+		void reload_shader_program(const std::string& a_program_key, const std::vector<std::string> a_shader_list);
+
 		/* @brief Retrives the program ID.
 		   @param Key of the shader program the user would like to key of.
 		   @return Returns a uint with the ID.
@@ -88,6 +90,8 @@ namespace uciniti
 		   @return True if the key exists, false if not.
 		*/
 		bool does_program_key_already_exist(const std::string& a_key);
+
+		void delete_program_at_key(const std::string& a_program_key);
 
 		/* @brief Cleans the shader manager.
 		*/

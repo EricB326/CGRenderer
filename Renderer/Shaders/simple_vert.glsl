@@ -17,8 +17,8 @@ void main()
 {
 	vec4 new_position = local_position;
 	
-	new_position.x += normalize((sin(local_position.y * 3.0f + time * 3.0f) * 0.3f)) 
-					+ (cos(local_position.z * 3.0f + time * 3.0f) * 0.3f);
+	//new_position.x += normalize((sin(local_position.y * 3.0f + time * 3.0f) * 0.3f)) 
+	//				+ (cos(local_position.z * 3.0f + time * 3.0f) * 0.3f);
 					
 	gl_Position = ((projection_view_matrix * model_matrix) * vec4(new_position));
 	

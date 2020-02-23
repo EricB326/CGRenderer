@@ -20,17 +20,17 @@
 /* @brief Data for the different types of shaders that
 	can be created.
 */
-enum class shader_type : uint
-{
-	VERTEX,
-	TESSELLATION_EVALUATION,
-	TESSELLATION_CONTROL,
-	GEOMETRY,
-	FRAGMENT
-};
-
 namespace uciniti
 {
+	enum class shader_type : uint
+	{
+		VERTEX,
+		TESSELLATION_EVALUATION,
+		TESSELLATION_CONTROL,
+		GEOMETRY,
+		FRAGMENT
+	};
+
 	class Shader
 	{
 	public:
@@ -39,7 +39,7 @@ namespace uciniti
 		/* @brief Constructor zeros all values. Expects the user
 			to later call load_from_file().
 		*/
-		Shader() : m_shader_id(0) {}
+		Shader() : m_shader_id(0), m_type_of_shader(shader_type::VERTEX), m_filepath("") {}
 
 		/* @brief Constructor zeros all values. Calls for the user
 			load_from_file() passing the data recieved.
@@ -55,6 +55,8 @@ namespace uciniti
 		*/
 		void load_from_file(const shader_type a_type_of_shader, const std::string& a_filepath);
 
+		void reload_shader();
+
 		/* @brief Retrives the shader id.
 		   @return Returns a unit of the shader id
 		*/
@@ -66,6 +68,16 @@ namespace uciniti
 		/* @brief Stores the id of the created program.
 		*/
 		uint m_shader_id;
+
+		/* @brief Stores the type of shader, used for reloading
+			shader files.
+		*/
+		shader_type m_type_of_shader;
+
+		/* @brief Stores the file path of shader, used for reloading
+			shader files.
+		*/
+		std::string m_filepath;
 
 		/******************************************************/
 		// Functions

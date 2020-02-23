@@ -22,30 +22,33 @@
 #include "Mesh.h"
 #include "ShaderManager.h"
 #include "FreeCamera.h"
+#include "Texture.h"
 
 GLFWwindow* window;
 uciniti::FreeCamera* main_camera;
 std::vector<uciniti::Mesh*> mesh_list;
 uciniti::ShaderManager* shaders;
+uciniti::Texture crate_texture;
 
 void clean_memory();
 bool init_window();
 bool create_geometry();
+bool create_textures();
 bool create_shaders();
 
 int main()
 {
-	// Check for memory leaks
+	// Check for memory leaks.
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	// Initialize window
+	// Initialize window.
 	if (!init_window())
 		return -1;
 
 	// Check current time point.
 	auto measure_time_start = std::chrono::high_resolution_clock::now();
 	printf("Creating geometry... ");
-	// Create geometry
+	// Create geometry.
 	if (!create_geometry())
 	{
 		printf("ERROR: create_geometry() call. Failed to create shader. See console for output.\n");
@@ -59,15 +62,30 @@ int main()
 	auto duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
 	printf("Time elapsed: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
 
+
 	measure_time_start = std::chrono::high_resolution_clock::now();
-	// Create shaders
+	// Create textures.
+	printf("Creating textures... ");
+	if (!create_textures())
+	{
+		printf("ERROR: create_textures() call. Failed to create texture. See console for output.\n");
+
+		clean_memory();
+		return -2;
+	}
+	measure_time_stop = std::chrono::high_resolution_clock::now();
+	duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
+	printf("Time elapsed: %.3f milliseconds!\n", (float)duration_of_function.count() / 1000);
+
+	measure_time_start = std::chrono::high_resolution_clock::now();
+	// Create shaders.
 	printf("Creating shaders... ");
 	if (!create_shaders())
 	{
 		printf("ERROR: create_shaders() call. Failed to create shader. See console for output.\n");
 
 		clean_memory();
-		return -2;
+		return -3;
 	}
 	measure_time_stop = std::chrono::high_resolution_clock::now();
 	duration_of_function = std::chrono::duration_cast<std::chrono::microseconds>(measure_time_stop - measure_time_start);
@@ -108,40 +126,49 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
-		// User created shader program
-		shaders->use_program("simple_program");
+		// User created shader program.
+		shaders->use_program("crate_program");
 
-		uniform_projection_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "projection_view_matrix");
-		uniform_model_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "model_matrix");
-		uniform_colour_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "colour");
-		uniform_time_location = glGetUniformLocation(shaders->get_program_id("simple_program"), "time");
+		// Check for a shader reload.
+		if (glfwGetKey(window, GLFW_KEY_R))
+		{
+			shaders->reload_shader_program("crate_program", { "crate_vert", "crate_frag" });
+		}
+
+		
+		uniform_projection_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "projection_view_matrix");
+		uniform_model_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "model_matrix");
+		uniform_time_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "time");
 
 		glUniformMatrix4fv(uniform_projection_location, 1, false, glm::value_ptr(main_camera->get_projection_view()));
+		glUniform1f(uniform_time_location, (float)current_time);
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		model = glm::mat4(1.0f);
+		//model = glm::mat4(1.0f);
 		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-		colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+		//colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
-		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
-		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
-		glUniform1f(uniform_time_location, (float)current_time);
+		//glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
+		//glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
 
 		//mesh_list[0]->render_mesh();
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		model = glm::mat4(1.0f);
-		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-		//model = glm::rotate(model, current_time, glm::vec3(0.5f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));
-		colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
+		//model = glm::translate(model, glm::vec3(0.0f, 20.0f, 0.0f));
+		//model = glm::rotate(model, (float)current_time, glm::vec3(0.5f, 1.0f, 0.0f));
+		//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+		//model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));
+		//model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
+		//colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
-		glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
+		//glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
 
-		mesh_list[2]->render_mesh();
+		crate_texture.use_texture();
+		mesh_list[5]->render_mesh();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -233,15 +260,33 @@ bool create_geometry()
 	mesh_list.push_back(cube_object);
 
 	// Create loaded .obj model.
+	uciniti::Mesh* alien_bug = new uciniti::Mesh();
+	uciniti::Mesh* soulspear = new uciniti::Mesh();
 	uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
-	bool loaded = stanford_bunny->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
-	//bool loaded = stanford_bunny->load_obj("..//Models//Soulspear//soulspear.obj");
-	//bool loaded = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
+	uciniti::Mesh* crate = new uciniti::Mesh();
+
+	bool loaded = alien_bug->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
+	bool loaded2 = soulspear->load_obj("..//Models//Soulspear//soulspear.obj");
+	bool loaded3 = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
+	bool loaded4 = crate->load_obj("..//Models//Free3D//Crate//Crate1.obj");
+
 	// Check for success.
-	if (!loaded)
+	if (!loaded || !loaded2 || !loaded3 || !loaded4)
 		return false;
 	// Add the model to the list if successful.
+	mesh_list.push_back(alien_bug);
+	mesh_list.push_back(soulspear);
 	mesh_list.push_back(stanford_bunny);
+	mesh_list.push_back(crate);
+
+	return true;
+}
+
+bool create_textures()
+{
+	crate_texture = uciniti::Texture();
+	if (!crate_texture.load_texture("..//Models//Free3D//Crate//crate_1.jpg"))
+		return false;
 
 	return true;
 }
@@ -251,14 +296,23 @@ bool create_shaders()
 	/*** Make Shaders ***/
 	shaders = new uciniti::ShaderManager();
 
-	// Load shaders.
-	if (!shaders->load_shader("simple_vert", shader_type::VERTEX, "..//Shaders//simple_vert.glsl"))
+	// Load simple shaders.
+	if (!shaders->load_shader("simple_vert", uciniti::shader_type::VERTEX, "..//Shaders//simple_vert.glsl"))
 		return false;
-	if (!shaders->load_shader("simple_frag", shader_type::FRAGMENT, "..//Shaders//simple_frag.glsl"))
+	if (!shaders->load_shader("simple_frag", uciniti::shader_type::FRAGMENT, "..//Shaders//simple_frag.glsl"))
+		return false;
+
+	// Load crate model shaders
+	if (!shaders->load_shader("crate_vert", uciniti::shader_type::VERTEX, "..//Shaders//crate_vert.glsl"))
+		return false;
+	if (!shaders->load_shader("crate_frag", uciniti::shader_type::FRAGMENT, "..//Shaders//crate_frag.glsl"))
 		return false;
 
 	// Create programs.
 	if (!shaders->create_shader_program("simple_program", { "simple_vert", "simple_frag" }))
+		return false;
+
+	if (!shaders->create_shader_program("crate_program", { "crate_vert", "crate_frag" }))
 		return false;
 
 	// Return true, successfully created shaders.
@@ -279,6 +333,7 @@ void clean_memory()
 	}
 	mesh_list.clear();
 
-	// Delete each shaders.
+	// Delete shaders.
 	delete shaders;
+	shaders = nullptr;
 }

@@ -4,48 +4,91 @@
 namespace uciniti
 {
 	Shader::Shader(const shader_type a_type_of_shader, const std::string& a_filepath)
-		: m_shader_id(0)
+		: m_shader_id(0), m_type_of_shader(a_type_of_shader), m_filepath(a_filepath)
 	{
 		load_from_file(a_type_of_shader, a_filepath);
 	}
 
 	void Shader::load_from_file(const shader_type a_type_of_shader, const std::string& a_filepath)
 	{
-		// Read the code form the file.
+		// Store the type of shader and file path.
+		m_type_of_shader = a_type_of_shader;
+		m_filepath = a_filepath;
+
+		// Read the code from the file.
 		std::string shader_string;
 		if (read_file_content(a_filepath, shader_string))
 		{
 			// Switch what type of shader is being created based
 			// on what the user passed.
-			switch (a_type_of_shader)
+			switch (m_type_of_shader)
 			{
-			case shader_type::VERTEX:
-			{
-				create_shader(shader_string, GL_VERTEX_SHADER);
-				break;
+				case shader_type::VERTEX:
+				{
+					create_shader(shader_string, GL_VERTEX_SHADER);
+					break;
+				}
+				case shader_type::TESSELLATION_EVALUATION:
+				{
+					create_shader(shader_string, GL_TESS_EVALUATION_SHADER);
+					break;
+				}
+				case shader_type::TESSELLATION_CONTROL:
+				{
+					create_shader(shader_string, GL_TESS_CONTROL_SHADER);
+					break;
+				}
+				case shader_type::GEOMETRY:
+				{
+					create_shader(shader_string, GL_GEOMETRY_SHADER);
+					break;
+				}
+				case shader_type::FRAGMENT:
+				{
+					create_shader(shader_string, GL_FRAGMENT_SHADER);
+					break;
+				}
+				default:
+					break;
 			}
-			case shader_type::TESSELLATION_EVALUATION:
+		}
+	}
+
+	void Shader::reload_shader()
+	{
+		// Read the new code from the file.
+		std::string reloaded_shader_string;
+		if (read_file_content(m_filepath, reloaded_shader_string))
+		{
+			switch (m_type_of_shader)
 			{
-				create_shader(shader_string, GL_TESS_EVALUATION_SHADER);
-				break;
-			}
-			case shader_type::TESSELLATION_CONTROL:
-			{
-				create_shader(shader_string, GL_TESS_CONTROL_SHADER);
-				break;
-			}
-			case shader_type::GEOMETRY:
-			{
-				create_shader(shader_string, GL_GEOMETRY_SHADER);
-				break;
-			}
-			case shader_type::FRAGMENT:
-			{
-				create_shader(shader_string, GL_FRAGMENT_SHADER);
-				break;
-			}
-			default:
-				break;
+				case shader_type::VERTEX:
+				{
+					create_shader(reloaded_shader_string, GL_VERTEX_SHADER);
+					break;
+				}
+				case shader_type::TESSELLATION_EVALUATION:
+				{
+					create_shader(reloaded_shader_string, GL_TESS_EVALUATION_SHADER);
+					break;
+				}
+				case shader_type::TESSELLATION_CONTROL:
+				{
+					create_shader(reloaded_shader_string, GL_TESS_CONTROL_SHADER);
+					break;
+				}
+				case shader_type::GEOMETRY:
+				{
+					create_shader(reloaded_shader_string, GL_GEOMETRY_SHADER);
+					break;
+				}
+				case shader_type::FRAGMENT:
+				{
+					create_shader(reloaded_shader_string, GL_FRAGMENT_SHADER);
+					break;
+				}
+				default:
+					break;
 			}
 		}
 	}
