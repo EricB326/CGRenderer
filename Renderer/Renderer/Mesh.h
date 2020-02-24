@@ -113,7 +113,7 @@ namespace uciniti
 		*/
 		Mesh();
 
-		/**/
+		/* TODO: Comment. */
 		Mesh(const char* a_filepath, bool a_load_textures = true, bool a_flip_textures = false);
 
 		/* @brief Constructor zeros all values with no params.
@@ -125,6 +125,8 @@ namespace uciniti
 		   @param The type of vertex being created, 0 = BASIC_VERTEX | 1 = STANDARD_VERTEX (see "common.h").
 		*/
 		Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type);
+
+		/* TODO: Comment. */
 		~Mesh() { clear_mesh(); }
 
 		/* @brief Renders the prepared mesh data
@@ -176,15 +178,10 @@ namespace uciniti
 		*/
 		const uint* m_indices;
 
-		/* @brief Number of indicies passed to
+		/* @brief Number of indicies and verts passed to
 			the class.
 		*/
-		GLsizei m_index_count;
-
-		/* @brief Number of verts passed to
-			the class.
-		*/
-		GLsizei m_vert_count;
+		GLsizei m_index_count, m_vert_count;
 
 		/* @brief Checks to see if the mesh is currently occupied
 			by another model. True if empty, false if occupied.
@@ -193,7 +190,7 @@ namespace uciniti
 
 		/******************************************************/
 		// Functions
-		/**/
+		/* TODO: Comment. */
 		void calculate_vertex_tangents(std::vector<standard_vertex>& a_vertices, const uint* a_indices);
 
 		/* @brief Initializes all the base vertex array/buffer objects

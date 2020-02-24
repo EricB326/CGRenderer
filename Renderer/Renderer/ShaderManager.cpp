@@ -69,6 +69,51 @@ namespace uciniti
 		return true;
 	}
 
+	void ShaderManager::bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const int a_count, bool a_should_transpose, const float* a_data_to_pass, const uniform_type a_type_to_bind)
+	{
+		uint uniform_location = glGetUniformLocation(a_program_id, a_uniform_location);
+
+		switch (a_type_to_bind)
+		{
+		case uciniti::uniform_type::UNIFORM_MATRIX_2fv:
+			glUniformMatrix2fv(uniform_location, a_count, a_should_transpose, a_data_to_pass);
+			break;
+		case uciniti::uniform_type::UNIFORM_MATRIX_3fv:
+			glUniformMatrix3fv(uniform_location, a_count, a_should_transpose, a_data_to_pass);
+			break;
+		case uciniti::uniform_type::UNIFORM_MATRIX_4fv:
+			glUniformMatrix4fv(uniform_location, a_count, a_should_transpose, a_data_to_pass);
+			break;
+		default:
+			printf("ERROR: bind_uniform_data() call. Could not find matrix uniform type passed.\n");
+			break;
+		}
+	}
+
+	void ShaderManager::bind_uniform_data(const uint a_program_id, const char* a_uniform_location, const int a_count, const float a_data_to_pass, const uniform_type a_type_to_bind)
+	{
+		uint uniform_location = glGetUniformLocation(a_program_id, a_uniform_location);
+
+		switch (a_type_to_bind)
+		{
+		case uciniti::uniform_type::UNIFORM_1f:
+			glUniform1f(uniform_location, a_data_to_pass);
+			break;
+		case uciniti::uniform_type::UNIFORM_1i:
+			glUniform1f(uniform_location, (int)a_data_to_pass);
+			break;
+		case uciniti::uniform_type::UNIFORM_1d:
+			glUniform1f(uniform_location, (double)a_data_to_pass);
+			break;
+		case uciniti::uniform_type::UNIFORM_1ui:
+			glUniform1ui(uniform_location, (uint)a_data_to_pass);
+			break;
+		default:
+			printf("ERROR: bind_uniform_data() call. Could not find uniform type passed.\n");
+			break;
+		}
+	}
+
 	void ShaderManager::use_program(const std::string& a_program_key)
 	{
 		// Verify the program key provided.

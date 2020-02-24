@@ -31,7 +31,7 @@ namespace uciniti
 		bool bind_texture(uciniti::texture_id a_texture_map_key);
 		bool use_texture(uciniti::texture_id a_texture_map_key) { return bind_texture(a_texture_map_key); }
 
-		inline uint get_handle() { return m_texture_handle; }
+		uint get_handle(uciniti::texture_id a_texture_key);
 		inline int get_width() { return m_width; }
 		inline int get_height() { return m_height; }
 

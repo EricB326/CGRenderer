@@ -99,11 +99,6 @@ int main()
 	/*** Background colour ***/
 	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 
-	glm::vec4 colour;
-
-
-	uint uniform_projection_location = 0, uniform_model_location = 0, uniform_colour_location = 0, uniform_time_location = 0;
-
 	// Delta time
 	double delta_time = 0.0f;
 	double last_time = 0.0f;
@@ -113,7 +108,7 @@ int main()
 	// Used for delaying blocks of code.
 	double run_delay = 0.0;
 
-	/*** Game Loop ***/
+	/*** Render Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
 		double current_time = glfwGetTime();
@@ -145,25 +140,8 @@ int main()
 		else
 			run_delay = 0.0;
 
-		uniform_projection_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "projection_view_matrix");
-		uniform_model_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "model_matrix");
-		uniform_time_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "time");
-
-		glUniformMatrix4fv(uniform_projection_location, 1, false, glm::value_ptr(main_camera->get_projection_view()));
-		glUniform1f(uniform_time_location, (float)current_time);
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		//model = glm::mat4(1.0f);
-		//model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-		//colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
-
-		//glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
-		//glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
-
-		//mesh_list[0]->render_mesh();
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		shaders->bind_uniform_data(shaders->get_program_id("crate_program"), "time", 1, (float)current_time, uciniti::uniform_type::UNIFORM_1f);
+		shaders->bind_uniform_matrix_data(shaders->get_program_id("crate_program"), "projection_view_matrix", 1, false, glm::value_ptr(main_camera->get_projection_view()), uciniti::uniform_type::UNIFORM_MATRIX_4fv);
 
 		model = glm::mat4(1.0f);
 		//model = glm::translate(model, glm::vec3(0.0f, 20.0f, 0.0f));
@@ -173,8 +151,7 @@ int main()
 		//model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		//colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
-		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
-		//glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
+		shaders->bind_uniform_matrix_data(shaders->get_program_id("crate_program"), "model_matrix", 1, false, glm::value_ptr(model), uciniti::uniform_type::UNIFORM_MATRIX_4fv);
 
 		uciniti::TextureManager::inst().use_texture(uciniti::texture_id::CRATE_TEXTURE_ID);
 		mesh_list[4]->render_mesh();
@@ -300,24 +277,18 @@ bool create_textures()
 	bool did_texture_load = false;
 
 	// Make sure there is an instance of the texture class.
-	uciniti::TextureManager& t = uciniti::TextureManager::inst();
+	uciniti::TextureManager& texture = uciniti::TextureManager::inst();
 
 	// Begin loading textures.
 	// Load crate texture.
-	did_texture_load = t.load_texture("..//Models//Free3D//Crate//crate_1.jpg", uciniti::texture_id::CRATE_TEXTURE_ID);
+	did_texture_load = texture.load_texture("..//Textures//wooden_crate.jpg", uciniti::texture_id::CRATE_TEXTURE_ID);
 	if (!did_texture_load)
-	{
-		printf("ERROR: load_texture call. Failed to load texture.\n");
 		return false;
-	}
 
 	// Load brick texture.
-	did_texture_load = t.load_texture("..//Models//Free3D//Crate//brick.jpg", uciniti::texture_id::CRATE_TEXTURE_ID);
+	did_texture_load = texture.load_texture("..//Textures//brick.jpg", uciniti::texture_id::BRICK_TEXTURE_ID);
 	if (!did_texture_load)
-	{
-		printf("ERROR: load_texture call. Failed to load texture.\n");
 		return false;
-	}
 
 	return true;
 }

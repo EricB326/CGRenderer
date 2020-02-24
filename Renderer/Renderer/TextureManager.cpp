@@ -41,9 +41,8 @@ namespace uciniti
 		glGenTextures(1, &m_texture_handle);
 		glBindTexture(GL_TEXTURE_2D, m_texture_handle);
 
-		printf("ID: %i", m_texture_handle);
 		// Specifiy texture parameters.
-		// Texture warpping behaviour.
+		// Texture wrapping behaviour.
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 		// Texture filtering behaviour.
@@ -73,12 +72,23 @@ namespace uciniti
 		if (m_texture_id_list.find((uint)a_texture_map_key) != m_texture_id_list.end())
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_texture_handle);
+			glBindTexture(GL_TEXTURE_2D, get_handle(a_texture_map_key));
 
 			return true;
 		}
 
 		return false;
+	}
+
+	uint TextureManager::get_handle(uciniti::texture_id a_texture_key)
+	{
+		for (std::pair<uint, uint> this_pair : m_texture_id_list)
+		{
+			if (this_pair.first == (uint)a_texture_key)
+				return this_pair.second;
+		}
+
+		return 0;
 	}
 
 	void TextureManager::clear_texture()
