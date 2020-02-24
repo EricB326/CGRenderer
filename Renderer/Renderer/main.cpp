@@ -154,7 +154,7 @@ int main()
 		shaders->bind_uniform_matrix_data(shaders->get_program_id("crate_program"), "model_matrix", 1, false, glm::value_ptr(model), uciniti::uniform_type::UNIFORM_MATRIX_4fv);
 
 		uciniti::TextureManager::inst().use_texture(uciniti::texture_id::CRATE_TEXTURE_ID);
-		mesh_list[4]->render_mesh();
+		mesh_list[1]->render_mesh();
 
 		// Allow for reload next frame.
 		has_reloaded = false;
@@ -222,50 +222,28 @@ bool create_geometry()
 
 	GLuint floor_indices[] = { 1, 0, 2, 2, 3, 1 };
 
-	// Create the points on a cube.
-	//					        Positions             Colours       
-	//						 X      Y      Z      R      G      B   
-	GLfloat vertices[] = { -1.0f, -1.0f,  0.0f,  1.0f,  0.0f,  0.0f,   // Bot left	     -- 0
-							1.0f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,   // Bot right	     -- 1
-						   -1.0f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,   // Top left	     -- 2
-							1.0f,  1.0f,  0.0f,  1.0f,  0.0f,  1.0f,   // Top right	     -- 3
-						   -1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,   // Back bot left  -- 4
-							1.0f, -1.0f, -1.0f,  1.0f, -1.0f, -1.0f,   // Back bot right -- 5
-						   -1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f,   // Back top left  -- 6
-							1.0f,  1.0f, -1.0f,  1.0f,  1.0f, -1.0f }; // Back top right -- 7
-
-	// Create the faces of a cube.
-	GLuint indices[] = { 0, 2, 6, 6, 4, 0,   // Left face
-						 1, 3, 7, 7, 5, 1,   // Right face
-						 4, 6, 7, 7, 5, 4,   // Back face
-						 0, 2, 3, 3, 1, 0,   // Front face
-						 0, 4, 5, 5, 1, 0,   // Bot face
-						 2, 6, 7, 7, 3, 2 }; // Top face
-
 	/*** Create and 'load' floor mesh ***/
 	uciniti::Mesh* floor_object = new uciniti::Mesh(floor_verts, floor_indices, 24, 6, vertex_type::BASE_VERTEX);
 	mesh_list.push_back(floor_object);
-	uciniti::Mesh* cube_object = new uciniti::Mesh(vertices, indices, 48, 36, vertex_type::BASE_VERTEX);
-	mesh_list.push_back(cube_object);
 
 	// Create loaded .obj model.
 	//uciniti::Mesh* alien_bug = new uciniti::Mesh();
-	uciniti::Mesh* soulspear = new uciniti::Mesh();
-	uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
+	//uciniti::Mesh* soulspear = new uciniti::Mesh();
+	//uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
 	uciniti::Mesh* crate = new uciniti::Mesh();
 
 	//bool loaded = alien_bug->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
-	bool loaded2 = soulspear->load_obj("..//Models//Soulspear//soulspear.obj");
-	bool loaded3 = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
-	bool loaded4 = crate->load_obj("..//Models//Free3D//Crate//Crate1.obj");
+	//bool loaded2 = soulspear->load_obj("..//Models//Soulspear//soulspear.obj", "soulspear");
+	//bool loaded3 = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj", "bunny");
+	bool loaded4 = crate->load_obj("..//Models//Free3D//Crate//Crate1.obj", "crate");
 
 	// Check for success.
-	if (/*!loaded ||*/ !loaded2 || !loaded3 || !loaded4)
+	if (/*!loaded ||*/ /*!loaded2 || !loaded3 ||*/ !loaded4)
 		return false;
 	// Add the model to the list if successful.
 	//mesh_list.push_back(alien_bug);
-	mesh_list.push_back(soulspear);
-	mesh_list.push_back(stanford_bunny);
+	//mesh_list.push_back(soulspear);
+	//mesh_list.push_back(stanford_bunny);
 	mesh_list.push_back(crate);
 
 	return true;

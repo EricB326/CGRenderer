@@ -36,7 +36,7 @@ namespace uciniti
 		}
 
 		// Create the new shader program.
-		ShaderProgram* new_mapped_program = new ShaderProgram;
+		ShaderProgram* new_mapped_program = new ShaderProgram();
 		std::vector<uint> shader_id_list;
 
 		// Loop through each identifier.

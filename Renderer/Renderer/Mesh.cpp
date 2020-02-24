@@ -6,6 +6,8 @@
 #include "..\Dependencies\tiny_obj\tiny_obj_loader.h"
 
 #include <chrono>
+#include "MaterialManager.h"
+#include <vector>
 
 namespace uciniti
 {
@@ -14,10 +16,10 @@ namespace uciniti
 	{
 	}
 
-	Mesh::Mesh(const char* a_filepath, bool a_load_textures, bool a_flip_textures)
+	Mesh::Mesh(const char* a_filepath, const char* a_material_name, bool a_load_textures, bool a_flip_textures)
 		: m_VAO(0), m_VBO(0), m_EBO(0), m_indices(0), m_index_count(0), m_vert_count(0), m_empty_mesh(true)
 	{
-		load_obj(a_filepath, a_load_textures, a_flip_textures);
+		load_obj(a_filepath, a_material_name, a_load_textures, a_flip_textures);
 	}
 
 	Mesh::Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type)
@@ -156,7 +158,7 @@ namespace uciniti
 		render_mesh();
 	}
 
-	bool Mesh::load_obj(const char* a_filepath, bool a_load_textures, bool a_filp_textures_v)
+	bool Mesh::load_obj(const char* a_filepath, const char* a_material_name, bool a_load_textures, bool a_filp_textures_v)
 	{
 		// Check to see if the mesh already has a model loaded.
 		if (!m_empty_mesh)
@@ -174,14 +176,28 @@ namespace uciniti
 		std::string folder = file.substr(0, file.find_last_of('/') + 1);
 		
 		// Check current time point.
-		//auto measure_time_start = std::chrono::high_resolution_clock::now();
-		//printf("Reading '%s'... ", a_filepath);
 		if (!tinyobj::LoadObj(shapes, materials, err, a_filepath, folder.c_str()))
 		{
 			printf("\nERROR: load_obj() call. Failed to load file '%s'!.\n", a_filepath);
 			printf("%s\n", err.c_str());
 			return false;
 		}
+
+		// Pass the material data.
+		std::vector<glm::vec3> loaded_mesh_materials;
+		float loaded_specular_shininess = 0.0f, loaded_alpha = 0.0f;
+		for (const auto& material : materials)
+		{
+			loaded_mesh_materials.push_back(glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]));
+			loaded_mesh_materials.push_back(glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]));
+			loaded_mesh_materials.push_back(glm::vec3(material.specular[0], material.specular[1], material.specular[2]));
+			loaded_mesh_materials.push_back(glm::vec3(material.emission[0], material.emission[1], material.emission[2]));
+			loaded_specular_shininess = material.shininess;
+			loaded_alpha = material.dissolve;
+		}
+
+		MaterialManager new_material = MaterialManager();
+		new_material.create_material(a_material_name, loaded_mesh_materials, loaded_specular_shininess, loaded_alpha);
 
 		// Pass data to the correct struct class.
 		for (const auto& shape : shapes)
@@ -211,8 +227,6 @@ namespace uciniti
 			// Calculate tangents for normal mapping.
 			if (!shape.mesh.normals.empty() && !shape.mesh.texcoords.empty())
 				calculate_vertex_tangents(m_standard_vert, m_indices);
-
-			//printf("post calculate tangents\n");
 		}
 
 		// Prepare the mesh for rendering.

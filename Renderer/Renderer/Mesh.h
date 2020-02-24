@@ -114,7 +114,7 @@ namespace uciniti
 		Mesh();
 
 		/* TODO: Comment. */
-		Mesh(const char* a_filepath, bool a_load_textures = true, bool a_flip_textures = false);
+		Mesh(const char* a_filepath, const char* a_material_name, bool a_load_textures = true, bool a_flip_textures = false);
 
 		/* @brief Constructor zeros all values with no params.
 			Resulting in no data being passed to the vertex structs.
@@ -149,7 +149,7 @@ namespace uciniti
 		   @param Should V textures be flipped. 
 		   @return True if successfully loaded, false if error occured.
 		*/
-		bool load_obj(const char* a_filepath, bool a_load_textures = true, bool a_flip_textures = false);
+		bool load_obj(const char* a_filepath, const char* a_material_name, bool a_load_textures = true, bool a_flip_textures = false);
 
 	private:
 		/******************************************************/
