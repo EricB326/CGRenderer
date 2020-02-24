@@ -1,4 +1,4 @@
-#include "Texture.h"
+#include "TextureManager.h"
 
 /* Graphic includes
 */
@@ -11,17 +11,21 @@
 
 namespace uciniti
 {
-	Texture::Texture()
+
+	TextureManager& TextureManager::inst()
+	{
+		// If no instance exists, create one.
+		static TextureManager inst;
+
+		// Return the instance.
+		return inst;
+	}
+
+	TextureManager::TextureManager()
 		: m_texture_handle(0), m_width(0), m_height(0), m_bit_depth(0)
 	{}
 
-	Texture::Texture(const char* a_filepath)
-		: m_texture_handle(0), m_width(0), m_height(0), m_bit_depth(0)
-	{
-		load_texture(a_filepath);
-	}
-
-	bool Texture::load_texture(const char* a_filepath)
+	bool TextureManager::load_texture(const char* a_filepath, uciniti::texture_id a_texture_map_key)
 	{
 		// Load the texture data.
 		unsigned char* texture_data = stbi_load(a_filepath, &m_width, &m_height, &m_bit_depth, STBI_default);
@@ -37,6 +41,7 @@ namespace uciniti
 		glGenTextures(1, &m_texture_handle);
 		glBindTexture(GL_TEXTURE_2D, m_texture_handle);
 
+		printf("ID: %i", m_texture_handle);
 		// Specifiy texture parameters.
 		// Texture warpping behaviour.
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -48,22 +53,35 @@ namespace uciniti
 		// Pass texture data to buffer.
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data);
 		// Generate texture mipmaps.
-		//glGenerateMipmap(GL_TEXTURE_2D);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Place the generated texture ID in the map at the correct texture key.
+		m_texture_id_list[(uint)a_texture_map_key] = m_texture_handle;
 
 		// Unbind texture.
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		// Free the memory of the texture data.
+		stbi_image_free(texture_data);
 
 		// Successfully loaded the texture.
 		return true;
 	}
 
-	void Texture::bind_texture()
+	bool TextureManager::bind_texture(uciniti::texture_id a_texture_map_key)
 	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_texture_handle);
+		if (m_texture_id_list.find((uint)a_texture_map_key) != m_texture_id_list.end())
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_texture_handle);
+
+			return true;
+		}
+
+		return false;
 	}
 
-	void Texture::clear_texture()
+	void TextureManager::clear_texture()
 	{
 		if (m_texture_handle != 0)
 			glDeleteTextures(1, &m_texture_handle);

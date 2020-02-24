@@ -90,6 +90,8 @@ namespace uciniti
 			return;
 		}
 
+		printf("Current ID: %s -> %i\n", a_program_key.c_str(), m_program_list[a_program_key]->get_program_id());
+
 		// Create the 'reloaded' program that will be taking the current programs position.
 		ShaderProgram* reloaded_program = new ShaderProgram;
 		std::vector<uint> reloaded_shader_id_list;
@@ -120,17 +122,12 @@ namespace uciniti
 		// Create the reloaded shader program.
 		reloaded_program->create_shader_program(reloaded_shader_id_list);
 
-		printf("Current ID: %s -> %i\n", a_program_key.c_str(), m_program_list[a_program_key]->get_program_id());
-		printf("Reloaded ID: %i\n", reloaded_program->get_program_id());
-
 		// Delete the current program in the map.
-		//glDeleteProgram(m_program_list[a_program_key]->get_program_id());
+		glDeleteProgram(m_program_list[a_program_key]->get_program_id());
 		delete_program_at_key(a_program_key);
 
 		// Replace the deleted program with the new reloaded program.
 		m_program_list[a_program_key] = reloaded_program;
-		printf("New current ID: %i\n", m_program_list[a_program_key]->get_program_id());
-		printf("Reloaded shader program '%s'.\n\n\n", a_program_key.c_str());
 	}
 
 	bool ShaderManager::does_shader_key_already_exist(const std::string& a_key)
@@ -180,14 +177,10 @@ namespace uciniti
 	{
 		// Delete Shader* pointers
 		for (std::pair<std::string, Shader*> this_pair : m_shader_list)
-		{
 			delete this_pair.second;
-		}
 
 		// Delete ShaderProgram* pointers
 		for (std::pair<std::string, ShaderProgram*> this_pair : m_program_list)
-		{
 			delete this_pair.second;
-		}
 	}
 }

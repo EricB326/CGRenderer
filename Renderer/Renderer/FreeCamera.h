@@ -73,6 +73,7 @@ namespace uciniti
 
 		/******************************************************/
 		// Functions
+
 		/* @brief Checks keyboard input from the user and stores
 			the amount to move by within a displacement vector.
 			Calculate the new position by the cameras world transform

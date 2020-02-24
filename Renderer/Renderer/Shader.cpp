@@ -167,6 +167,7 @@ namespace uciniti
 
 			// Clean up.
 			delete[] log;
+			log = nullptr;
 
 			// Set shader_id to error value
 			m_shader_id = 0;

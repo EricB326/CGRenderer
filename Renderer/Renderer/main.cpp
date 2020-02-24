@@ -22,13 +22,12 @@
 #include "Mesh.h"
 #include "ShaderManager.h"
 #include "FreeCamera.h"
-#include "Texture.h"
+#include "TextureManager.h"
 
 GLFWwindow* window;
 uciniti::FreeCamera* main_camera;
 std::vector<uciniti::Mesh*> mesh_list;
 uciniti::ShaderManager* shaders;
-uciniti::Texture crate_texture;
 
 void clean_memory();
 bool init_window();
@@ -109,6 +108,11 @@ int main()
 	double delta_time = 0.0f;
 	double last_time = 0.0f;
 
+	// Allow only one reload per frame.
+	bool has_reloaded = false;
+	// Used for delaying blocks of code.
+	double run_delay = 0.0;
+
 	/*** Game Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
 	{
@@ -130,12 +134,17 @@ int main()
 		shaders->use_program("crate_program");
 
 		// Check for a shader reload.
-		if (glfwGetKey(window, GLFW_KEY_R))
+		if (glfwGetKey(window, GLFW_KEY_R) && !run_delay)
 		{
 			shaders->reload_shader_program("crate_program", { "crate_vert", "crate_frag" });
+			has_reloaded = true;
 		}
+		// Delay the user from being able to constantly reload the shader.
+		if (glfwGetKey(window, GLFW_KEY_R))
+			run_delay++;
+		else
+			run_delay = 0.0;
 
-		
 		uniform_projection_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "projection_view_matrix");
 		uniform_model_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "model_matrix");
 		uniform_time_location = glGetUniformLocation(shaders->get_program_id("crate_program"), "time");
@@ -167,8 +176,11 @@ int main()
 		glUniformMatrix4fv(uniform_model_location, 1, false, glm::value_ptr(model));
 		//glUniform4fv(uniform_colour_location, 1, glm::value_ptr(colour));
 
-		crate_texture.use_texture();
-		mesh_list[5]->render_mesh();
+		uciniti::TextureManager::inst().use_texture(uciniti::texture_id::CRATE_TEXTURE_ID);
+		mesh_list[4]->render_mesh();
+
+		// Allow for reload next frame.
+		has_reloaded = false;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -260,21 +272,21 @@ bool create_geometry()
 	mesh_list.push_back(cube_object);
 
 	// Create loaded .obj model.
-	uciniti::Mesh* alien_bug = new uciniti::Mesh();
+	//uciniti::Mesh* alien_bug = new uciniti::Mesh();
 	uciniti::Mesh* soulspear = new uciniti::Mesh();
 	uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
 	uciniti::Mesh* crate = new uciniti::Mesh();
 
-	bool loaded = alien_bug->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
+	//bool loaded = alien_bug->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
 	bool loaded2 = soulspear->load_obj("..//Models//Soulspear//soulspear.obj");
 	bool loaded3 = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj");
 	bool loaded4 = crate->load_obj("..//Models//Free3D//Crate//Crate1.obj");
 
 	// Check for success.
-	if (!loaded || !loaded2 || !loaded3 || !loaded4)
+	if (/*!loaded ||*/ !loaded2 || !loaded3 || !loaded4)
 		return false;
 	// Add the model to the list if successful.
-	mesh_list.push_back(alien_bug);
+	//mesh_list.push_back(alien_bug);
 	mesh_list.push_back(soulspear);
 	mesh_list.push_back(stanford_bunny);
 	mesh_list.push_back(crate);
@@ -284,9 +296,28 @@ bool create_geometry()
 
 bool create_textures()
 {
-	crate_texture = uciniti::Texture();
-	if (!crate_texture.load_texture("..//Models//Free3D//Crate//crate_1.jpg"))
+	// Error checking variable for if textures were loaded.
+	bool did_texture_load = false;
+
+	// Make sure there is an instance of the texture class.
+	uciniti::TextureManager& t = uciniti::TextureManager::inst();
+
+	// Begin loading textures.
+	// Load crate texture.
+	did_texture_load = t.load_texture("..//Models//Free3D//Crate//crate_1.jpg", uciniti::texture_id::CRATE_TEXTURE_ID);
+	if (!did_texture_load)
+	{
+		printf("ERROR: load_texture call. Failed to load texture.\n");
 		return false;
+	}
+
+	// Load brick texture.
+	did_texture_load = t.load_texture("..//Models//Free3D//Crate//brick.jpg", uciniti::texture_id::CRATE_TEXTURE_ID);
+	if (!did_texture_load)
+	{
+		printf("ERROR: load_texture call. Failed to load texture.\n");
+		return false;
+	}
 
 	return true;
 }
