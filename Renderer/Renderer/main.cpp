@@ -103,10 +103,10 @@ int main()
 	double delta_time = 0.0f;
 	double last_time = 0.0f;
 
-	// Allow only one reload per frame.
-	bool has_reloaded = false;
 	// Used for delaying blocks of code.
 	double run_delay = 0.0;
+
+	uciniti::TextureManager::inst().get_all_texture_names();
 
 	/*** Render Loop ***/
 	while (!glfwWindowShouldClose(window) && glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS)
@@ -130,10 +130,7 @@ int main()
 
 		// Check for a shader reload.
 		if (glfwGetKey(window, GLFW_KEY_R) && !run_delay)
-		{
 			shaders->reload_shader_program("crate_program", { "crate_vert", "crate_frag" });
-			has_reloaded = true;
-		}
 		// Delay the user from being able to constantly reload the shader.
 		if (glfwGetKey(window, GLFW_KEY_R))
 			run_delay++;
@@ -151,13 +148,11 @@ int main()
 		//model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		//colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
-		shaders->bind_uniform_matrix_data(shaders->get_program_id("crate_program"), "model_matrix", 1, false, glm::value_ptr(model), uciniti::uniform_type::UNIFORM_MATRIX_4fv);
+		shaders->bind_uniform_matrix_data(shaders->get_program_id("crate_program"), "model_matrix", 1, false, (GLfloat*)&model, uciniti::uniform_type::UNIFORM_MATRIX_4fv);
+		//glUniformMatrix4fv(0, 0, false, )
 
-		uciniti::TextureManager::inst().use_texture(uciniti::texture_id::CRATE_TEXTURE_ID);
+		uciniti::TextureManager::inst().use_texture("crate_texture");
 		mesh_list[1]->render_mesh();
-
-		// Allow for reload next frame.
-		has_reloaded = false;
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -259,12 +254,12 @@ bool create_textures()
 
 	// Begin loading textures.
 	// Load crate texture.
-	did_texture_load = texture.load_texture("..//Textures//wooden_crate.jpg", uciniti::texture_id::CRATE_TEXTURE_ID);
+	did_texture_load = texture.create_texture("crate_texture", "..//Textures//wooden_crate.jpg");
 	if (!did_texture_load)
 		return false;
 
 	// Load brick texture.
-	did_texture_load = texture.load_texture("..//Textures//brick.jpg", uciniti::texture_id::BRICK_TEXTURE_ID);
+	did_texture_load = texture.create_texture("brick_texture", "..//Textures//brick.jpg");
 	if (!did_texture_load)
 		return false;
 

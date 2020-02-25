@@ -1,53 +1,35 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#ifndef TEXTURE_MANAGER_H
+#define TEXTURE_MANAGER_H
 
 #include "common.h"
+#include "Texture.h"
 #include <map>
+#include <string>
 
 namespace uciniti
 {
-	enum class texture_id
-	{
-		BACKGROUND_TEXTURE_ID,
-		GROUND_TEXTURE_ID,
-		CRATE_TEXTURE_ID,
-		BRICK_TEXTURE_ID
-	};
-
 	class TextureManager
 	{
-
 	public:
 		static TextureManager& inst();
 
 		TextureManager(const TextureManager&) = delete;
 		void operator=(const TextureManager&) = delete;
 
+		~TextureManager();
 
-		~TextureManager() { clear_texture(); }
+		bool create_texture(const char* a_key_name, const char* a_filepath);
+		Texture* get_texture(const char* a_key_name) { return m_texture_map_list[a_key_name]; }
+		void use_texture(const char* a_key_name) { m_texture_map_list[a_key_name]->bind_texture(); }
+		bool clear_texture(const char* a_key_name);
 
-		bool load_texture(const char* a_filepath, uciniti::texture_id a_texture_map_key);
+		void get_all_texture_names();
 
-		bool bind_texture(uciniti::texture_id a_texture_map_key);
-		bool use_texture(uciniti::texture_id a_texture_map_key) { return bind_texture(a_texture_map_key); }
+	private:
+		std::map<std::string, Texture*> m_texture_map_list;
 
-		uint get_handle(uciniti::texture_id a_texture_key);
-		inline int get_width() { return m_width; }
-		inline int get_height() { return m_height; }
-
-
-	protected:
-		std::map<uint, uint> m_texture_id_list;
-
-		uint m_texture_handle;
-		int m_width, m_height;
-		int m_bit_depth;
-
-		TextureManager();
-
-		void clear_texture();
-		void reset_instance();
+		TextureManager() {}
 	};
 }
 
-#endif // !TEXTURE_H
+#endif // !TEXTURE_MANAGER_H

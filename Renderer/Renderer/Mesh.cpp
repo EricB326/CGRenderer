@@ -7,10 +7,20 @@
 
 #include <chrono>
 #include "MaterialManager.h"
+#include "TextureManager.h"
 #include <vector>
+
 
 namespace uciniti
 {
+	/* @detail A foward declaration of the create_texture_maps() function.
+		This is done because the library tinyobj needs specific implementation,
+		not allowing for its variables its variables to be created outside of the
+		class where the implementation is done. You cannot move this implementation
+		to the header file as the functions the library uses are only usable when the
+		implementation is within the same file.
+	*/
+	void create_texture_maps(tinyobj::material_t a_material);
 	Mesh::Mesh()
 		: m_VAO(0), m_VBO(0), m_EBO(0), m_indices(0), m_index_count(0), m_vert_count(0), m_empty_mesh(true)
 	{
@@ -157,7 +167,7 @@ namespace uciniti
 	{
 		render_mesh();
 	}
-
+	
 	bool Mesh::load_obj(const char* a_filepath, const char* a_material_name, bool a_load_textures, bool a_filp_textures_v)
 	{
 		// Check to see if the mesh already has a model loaded.
@@ -188,12 +198,15 @@ namespace uciniti
 		float loaded_specular_shininess = 0.0f, loaded_alpha = 0.0f;
 		for (const auto& material : materials)
 		{
-			loaded_mesh_materials.push_back(glm::vec3(material.ambient[0], material.ambient[1], material.ambient[2]));
-			loaded_mesh_materials.push_back(glm::vec3(material.diffuse[0], material.diffuse[1], material.diffuse[2]));
-			loaded_mesh_materials.push_back(glm::vec3(material.specular[0], material.specular[1], material.specular[2]));
-			loaded_mesh_materials.push_back(glm::vec3(material.emission[0], material.emission[1], material.emission[2]));
+			loaded_mesh_materials.push_back((glm::vec3)(material.ambient[0]));
+			loaded_mesh_materials.push_back((glm::vec3)(material.diffuse[0]));
+			loaded_mesh_materials.push_back((glm::vec3)(material.specular[0]));
+			loaded_mesh_materials.push_back((glm::vec3)(material.emission[0]));
+
 			loaded_specular_shininess = material.shininess;
 			loaded_alpha = material.dissolve;
+
+			create_texture_maps(material);
 		}
 
 		MaterialManager new_material = MaterialManager();
@@ -425,6 +438,100 @@ namespace uciniti
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
+	}
+
+	void create_texture_maps(tinyobj::material_t a_material)
+	{
+		if (a_material.alpha_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.alpha_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.alpha_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("alpha_map", new_texture_path.c_str());
+		}
+
+		if (a_material.ambient_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.ambient_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.ambient_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("ambient_map", new_texture_path.c_str());
+		}
+
+		if (a_material.bump_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.bump_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.bump_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("bump_map", new_texture_path.c_str());
+		}
+
+		if (a_material.diffuse_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.diffuse_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.diffuse_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("diffuse_map", new_texture_path.c_str());
+		}
+
+		if (a_material.displacement_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.displacement_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.displacement_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("displacement_map", new_texture_path.c_str());
+		}
+
+		if (a_material.specular_highlight_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.specular_highlight_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.specular_highlight_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("specular_highlight_map", new_texture_path.c_str());
+		}
+
+		if (a_material.specular_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.specular_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.specular_texname).substr(location + 1);
+			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+
+			// Pass the texture file data.
+			TextureManager& texture = TextureManager::inst();
+			texture.create_texture("specular_map", new_texture_path.c_str());
+		}
 	}
 
 	void Mesh::clear_mesh()

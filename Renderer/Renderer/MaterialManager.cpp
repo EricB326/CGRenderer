@@ -15,7 +15,9 @@ bool MaterialManager::create_material(const char* a_key_name, std::vector<glm::v
 	
 	new_material->set_mat_attributes(a_material_list[0], a_material_list[1], a_material_list[2], a_material_list[3], a_spec_shininess, a_alpha);
 
-	return false;
+	m_material_map_list[a_key_name] = new_material;
+
+	return true;
 }
 
 void MaterialManager::clean_material()

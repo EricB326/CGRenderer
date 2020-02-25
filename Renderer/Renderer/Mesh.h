@@ -5,7 +5,6 @@
 */
 #include <iostream>
 #include <vector>
-
 /* Graphic includes
 */
 #include "gl_core_4_5.h"
@@ -207,6 +206,8 @@ namespace uciniti
 			to be ready for rendering the mesh.
 		*/
 		void setup_full_mesh();
+
+		//void create_texture_maps(tinyobj::material_t a_material);
 
 		/* @brief Clears all the buffers and resets the
 			array/vertex objects.
