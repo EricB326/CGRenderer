@@ -144,7 +144,7 @@ int main()
 		//model = glm::translate(model, glm::vec3(0.0f, 20.0f, 0.0f));
 		//model = glm::rotate(model, (float)current_time, glm::vec3(0.5f, 1.0f, 0.0f));
 		//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 1.0f, 0.0f));
-		//model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));
+		model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 		//model = glm::scale(model, glm::vec3(3.0f, 3.0f, 3.0f));
 		//colour = glm::vec4(1.0f, 0.0f, 1.0f, 1.0f);
 
@@ -218,19 +218,21 @@ bool create_geometry()
 	GLuint floor_indices[] = { 1, 0, 2, 2, 3, 1 };
 
 	/*** Create and 'load' floor mesh ***/
-	uciniti::Mesh* floor_object = new uciniti::Mesh(floor_verts, floor_indices, 24, 6, vertex_type::BASE_VERTEX);
-	mesh_list.push_back(floor_object);
+	//uciniti::Mesh* floor_object = new uciniti::Mesh(floor_verts, floor_indices, 24, 6, vertex_type::BASE_VERTEX);
+	//mesh_list.push_back(floor_object);
 
 	// Create loaded .obj model.
 	//uciniti::Mesh* alien_bug = new uciniti::Mesh();
 	//uciniti::Mesh* soulspear = new uciniti::Mesh();
 	//uciniti::Mesh* stanford_bunny = new uciniti::Mesh();
 	uciniti::Mesh* crate = new uciniti::Mesh();
+	uciniti::Mesh* mayan_house = new uciniti::Mesh();
 
 	//bool loaded = alien_bug->load_obj("..//Models//KazChesna//Alienbug_LP.obj");
 	//bool loaded2 = soulspear->load_obj("..//Models//Soulspear//soulspear.obj", "soulspear");
 	//bool loaded3 = stanford_bunny->load_obj("..//Models//Stanford//Bunny.obj", "bunny");
 	bool loaded4 = crate->load_obj("..//Models//Free3D//Crate//Crate1.obj", "crate");
+	bool loaded5 = mayan_house->load_obj("..//Models//ChallengeModel//MayanHouse//MayanHouse.obj", "mayan_house");
 
 	// Check for success.
 	if (/*!loaded ||*/ /*!loaded2 || !loaded3 ||*/ !loaded4)
@@ -240,6 +242,7 @@ bool create_geometry()
 	//mesh_list.push_back(soulspear);
 	//mesh_list.push_back(stanford_bunny);
 	mesh_list.push_back(crate);
+	mesh_list.push_back(mayan_house);
 
 	return true;
 }

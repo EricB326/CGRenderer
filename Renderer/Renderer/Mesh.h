@@ -98,6 +98,23 @@ enum class vertex_type : uint
 	FULL_VERTEX
 };
 
+struct sub_mesh_data
+{
+	/* @brief Data required for rendering.
+	*/
+	GLuint m_VAO, m_VBO, m_EBO;
+
+	/* @brief The data passed through from the index
+	array.
+	*/
+	const uint* m_indices;
+
+	/* @brief Number of indicies and verts passed to
+		the class.
+	*/
+	GLsizei m_index_count, m_vert_count;
+};
+
 /* @brief Handles the creation and rendering of vertices in
    the renderer. 
 */
@@ -153,10 +170,6 @@ namespace uciniti
 	private:
 		/******************************************************/
 		// Variables
-		/* @brief Data required for rendering.
-		*/
-		GLuint m_VAO, m_VBO, m_EBO;
-
 		/* @brief Declareation of the base_vertex struct, to
 			prepare for initialized data.
 		*/
@@ -172,25 +185,17 @@ namespace uciniti
 		*/
 		std::vector<full_vertex> m_full_vert;
 
-		/* @brief The data passed through from the index
-			array.
-		*/
-		const uint* m_indices;
-
-		/* @brief Number of indicies and verts passed to
-			the class.
-		*/
-		GLsizei m_index_count, m_vert_count;
-
 		/* @brief Checks to see if the mesh is currently occupied
 			by another model. True if empty, false if occupied.
 		*/
 		bool m_empty_mesh;
 
+		std::vector<sub_mesh_data> sub_meshes;
+
 		/******************************************************/
 		// Functions
 		/* TODO: Comment. */
-		void calculate_vertex_tangents(std::vector<standard_vertex>& a_vertices, const uint* a_indices);
+		void calculate_vertex_tangents(std::vector<standard_vertex>& a_vertices, const uint* a_indices, const GLsizei a_index_count);
 
 		/* @brief Initializes all the base vertex array/buffer objects
 			to be ready for rendering the mesh.
@@ -200,7 +205,7 @@ namespace uciniti
 		/* @brief Initializes all the standard vertex array/buffer objects
 			to be ready for rendering the mesh.
 		*/
-		void setup_standard_mesh();
+		void setup_standard_mesh(GLuint a_vao, GLuint a_vbo, GLuint a_ebo, const GLsizei a_index_count, const uint* a_indices);
 
 		/* @brief Initializes all the full vertex array/buffer objects
 			to be ready for rendering the mesh.
@@ -213,7 +218,6 @@ namespace uciniti
 			array/vertex objects.
 		*/
 		void clear_mesh();
-
 	};
 }
 
