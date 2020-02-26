@@ -38,12 +38,22 @@ namespace uciniti
 		return true;
 	}
 
+	void TextureManager::use_all_textures()
+	{
+		int index = 0;
+		for (auto& this_pair : m_texture_map_list)
+		{
+			this_pair.second->bind_texture(index);
+			index++;
+		}
+	}
+
 	void TextureManager::get_all_texture_names()
 	{
 		int index = 0;
 		for (std::pair<std::string, Texture*> this_pair : m_texture_map_list)
 		{
-			printf("\nTexture%i map name/key: %s\n", index, this_pair.first.c_str());
+			printf("\nTexture%i map name/key: %s", index, this_pair.first.c_str());
 			index++;
 		}
 	}

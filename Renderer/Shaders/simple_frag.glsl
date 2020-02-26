@@ -1,12 +1,10 @@
 #version 450
 
-uniform vec4 colour = vec4(1.0, 1.0, 1.0, 1.0);
-
-in vec3 outNormals;
+in vec3 out_colour;
 
 out vec4 final_colour;
 
 void main()
 {
-	final_colour = vec4(outNormals, 1.0);
+	final_colour = vec4(out_colour, 1.0f);
 }

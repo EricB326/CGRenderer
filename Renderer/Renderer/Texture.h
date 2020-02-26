@@ -11,15 +11,16 @@ namespace uciniti
 		Texture();
 
 		bool load_texture(const char* a_filepath);
-		bool bind_texture();
-		bool use_texture() { return bind_texture(); }
+		bool bind_texture(int a_index);
+		bool use_texture(int a_index) { return bind_texture(a_index); }
+		bool bind_multiple_textures(int a_num_of_textures);
 
-		uint get_handle();
+		unsigned int get_handle();
 		inline int get_width() { return m_width; }
 		inline int get_height() { return m_height; }
 
 	private:
-		uint m_texture_handle;
+		unsigned int m_texture_handle;
 		int m_width, m_height;
 		int m_bit_depth;
 

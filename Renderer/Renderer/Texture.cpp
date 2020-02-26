@@ -48,20 +48,15 @@ namespace uciniti
 		return true;
 	}
 
-	bool Texture::bind_texture()
+	bool Texture::bind_texture(int a_index)
 	{
-		//if (m_texture_id_list.find((uint)a_texture_map_key) != m_texture_id_list.end())
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_texture_handle);
+		glActiveTexture(GL_TEXTURE0 + a_index);
+		glBindTexture(GL_TEXTURE_2D, m_texture_handle);
 
-			return true;
-		}
-
-		return false;
+		return true;
 	}
 
-	uint Texture::get_handle()
+	unsigned int Texture::get_handle()
 	{
 		return m_texture_handle;
 	}

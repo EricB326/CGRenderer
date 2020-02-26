@@ -7,5 +7,5 @@ out vec4 final_colour;
 
 void main()
 {
-	final_colour = texture(object_texture, final_texture_coords) * vec4(0.0f, 0.7f, 1.0f, 1.0f);
+	final_colour = texture(object_texture, final_texture_coords);
 }

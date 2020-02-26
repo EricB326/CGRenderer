@@ -3,7 +3,7 @@
 namespace uciniti
 {
 	FreeCamera::FreeCamera()
-		: m_camera_movement_speed(5.0f), m_mouse_sensitivity(0.1f), m_first_mouse_call(true)
+		: m_camera_movement_speed(3.0f), m_mouse_sensitivity(0.1f), m_first_mouse_call(true)
 	{}
 
 	FreeCamera::FreeCamera(const glm::vec3 a_position, const glm::vec3 a_look_at_point, const float a_aspect_ratio, const float a_FOV_Y, const float a_near_distance, const float a_far_distance)

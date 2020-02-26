@@ -17,8 +17,7 @@ void main()
 	final_texture_coords = texture_coords;	
 	
 	vec4 new_position = local_position;
-	
-	new_position.x += ((sin(local_position.y * 3.0f + time * 3.0f) * 0.7f));
+	//new_position.x += ((sin(local_position.y * 3.0f + time * 3.0f) * 0.7f));
 					
 	gl_Position = ((projection_view_matrix * model_matrix) * vec4(new_position));
 }

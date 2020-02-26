@@ -48,10 +48,6 @@ struct standard_vertex
 	*/
 	glm::vec4 m_tangent;
 
-	/* @brief Bitangents of vertex.
-	*/
-	glm::vec4 m_bitangent;
-
 	/* @brief Texture coords of vertex.
 	*/
 	glm::vec2 m_tex_coords;
@@ -165,7 +161,7 @@ namespace uciniti
 		   @param Should V textures be flipped. 
 		   @return True if successfully loaded, false if error occured.
 		*/
-		bool load_obj(const char* a_filepath, const char* a_material_name, bool a_load_textures = true, bool a_flip_textures = false);
+		bool load_obj(const char* a_filepath, const char* a_material_name, bool a_load_textures = true, bool a_should_textures_flip = false);
 
 	private:
 		/******************************************************/
@@ -185,12 +181,22 @@ namespace uciniti
 		*/
 		std::vector<full_vertex> m_full_vert;
 
+		std::vector<sub_mesh_data> sub_meshes;
+
 		/* @brief Checks to see if the mesh is currently occupied
 			by another model. True if empty, false if occupied.
 		*/
 		bool m_empty_mesh;
 
-		std::vector<sub_mesh_data> sub_meshes;
+		/* @brief Sets to true if the geometry is being passed
+			by the user. False if it is loaded via files.
+		*/
+		bool m_is_geometry_user_defined;
+
+		/* @brief Data necessary for rendering geometry. Used
+				  for user passed data.
+		*/
+		GLuint m_VAO, m_VBO, m_EBO, m_index_count;
 
 		/******************************************************/
 		// Functions
@@ -200,19 +206,17 @@ namespace uciniti
 		/* @brief Initializes all the base vertex array/buffer objects
 			to be ready for rendering the mesh.
 		*/
-		void setup_base_mesh();
+		void setup_base_mesh(GLuint a_vao, GLuint a_vbo, GLuint a_ebo, const uint* a_indices);
 
 		/* @brief Initializes all the standard vertex array/buffer objects
 			to be ready for rendering the mesh.
 		*/
-		void setup_standard_mesh(GLuint a_vao, GLuint a_vbo, GLuint a_ebo, const GLsizei a_index_count, const uint* a_indices);
+		void setup_standard_mesh(GLuint a_vao, GLuint a_vbo, GLuint a_ebo, const uint* a_indices);
 
 		/* @brief Initializes all the full vertex array/buffer objects
 			to be ready for rendering the mesh.
 		*/
-		void setup_full_mesh();
-
-		//void create_texture_maps(tinyobj::material_t a_material);
+		void setup_full_mesh(GLuint a_vao, GLuint a_vbo, GLuint a_ebo, const uint* a_indices);
 
 		/* @brief Clears all the buffers and resets the
 			array/vertex objects.
