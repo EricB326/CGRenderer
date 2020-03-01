@@ -173,7 +173,7 @@ namespace uciniti
 		}
 	}
 
-	void ShaderManager::bind_uniform_vector_data(const uint a_program_id, const char* a_uniform_location, const int a_count, const float* a_data_to_pass, const uniform_type a_type_to_bind)
+	void ShaderManager::bind_uniform_vector_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const float* a_data_to_pass)
 	{
 		switch (a_type_to_bind)
 		{
@@ -186,7 +186,7 @@ namespace uciniti
 		}
 	}
 
-	void ShaderManager::bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const int a_count, bool a_should_transpose, const float* a_data_to_pass, const uniform_type a_type_to_bind)
+	void ShaderManager::bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const int a_count, const float* a_data_to_pass, bool a_should_transpose)
 	{
 		switch (a_type_to_bind)
 		{

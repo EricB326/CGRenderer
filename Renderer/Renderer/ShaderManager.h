@@ -81,33 +81,25 @@ namespace uciniti
 			and it will be correctly passed to the openGl uniform call.
 		   @param ID of the program being used.
 		   @param Location (name) of the uniform in the shader.
-		   @param Number of data being passed.
-		   @param Data to be passed.
-		   @param Type of uniform to be used (1f, 1i, 3f, etc).
+		   @param Floating point data to be passed.
+		   @param Template data to be passed. Only for non-floating point values.
 		*/
 		template<typename type>
-		void bind_uniform_data(const uint a_program_id, const char* a_uniform_location, const int a_count, type* a_data_to_pass, const uniform_type a_type_to_bind)
+		void bind_uniform_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const double& a_float_data_to_pass = 0.0f, const type& a_data_to_pass = 0)
 		{
-			float data_to_pass = 0;
-			float array_to_pass[3] = {0, 0, 0};
-
 			switch (a_type_to_bind)
 			{
 			case uciniti::uniform_type::UNIFORM_1f:
-				data_to_pass = *a_data_to_pass;
-				glUniform1f(glGetUniformLocation(a_program_id, a_uniform_location), data_to_pass);
+				glUniform1f(glGetUniformLocation(a_program_id, a_uniform_location), (float)a_float_data_to_pass);
 				break;
 			case uciniti::uniform_type::UNIFORM_1i:
-				data_to_pass = *a_data_to_pass;
-				glUniform1i(glGetUniformLocation(a_program_id, a_uniform_location), data_to_pass);
+				glUniform1i(glGetUniformLocation(a_program_id, a_uniform_location), (int)a_data_to_pass);
 				break;
 			case uciniti::uniform_type::UNIFORM_1d:
-				data_to_pass = *a_data_to_pass;
-				glUniform1d(glGetUniformLocation(a_program_id, a_uniform_location), data_to_pass);
+				glUniform1d(glGetUniformLocation(a_program_id, a_uniform_location), a_float_data_to_pass);
 				break;
 			case uciniti::uniform_type::UNIFORM_1ui:
-				data_to_pass = *a_data_to_pass;
-				glUniform1ui(glGetUniformLocation(a_program_id, a_uniform_location), data_to_pass);
+				glUniform1ui(glGetUniformLocation(a_program_id, a_uniform_location), (uint)a_data_to_pass);
 				break;
 			default:
 				printf("ERROR: bind_uniform_data() call. Could not find uniform type passed.\n");
@@ -115,9 +107,9 @@ namespace uciniti
 			}
 		}
 
-		void bind_uniform_vector_data(const uint a_program_id, const char* a_uniform_location, const int a_count, const float* a_data_to_pass, const uniform_type a_type_to_bind);
+		void bind_uniform_vector_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const float* a_data_to_pass);
 
-		void bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const int a_count, bool a_should_transpose, const float* a_data_to_pass, const uniform_type a_type_to_bind);
+		void bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const int a_count, const float* a_data_to_pass, bool a_should_transpose);
 
 	private:
 		/******************************************************/

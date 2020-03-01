@@ -9,7 +9,7 @@
 namespace uciniti
 {
 	Texture::Texture()
-		: m_texture_handle(0), m_width(0), m_height(0), m_bit_depth(0)
+		: m_texture_handle(0), m_width(0), m_height(0), m_bit_depth(0), m_texture_sampler_id(0)
 	{}
 
 	bool Texture::load_texture(const char* a_filepath)
@@ -56,9 +56,14 @@ namespace uciniti
 		return true;
 	}
 
-	unsigned int Texture::get_handle()
+	uint Texture::get_handle()
 	{
 		return m_texture_handle;
+	}
+
+	uint Texture::get_sampler_id()
+	{
+		return m_texture_sampler_id;
 	}
 
 	void Texture::clear_texture()
