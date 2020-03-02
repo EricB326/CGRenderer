@@ -6,21 +6,9 @@
 
 namespace uciniti
 {
-
-	TextureManager& TextureManager::inst()
-	{
-		// If no instance exists, create one.
-		static TextureManager inst;
-
-		// Return the instance.
-		return inst;
-	}
-
 	TextureManager::~TextureManager()
 	{
-		// Delete Texture* pointers
-		for (std::pair<std::string, Texture*> this_pair : m_texture_map_list)
-			delete this_pair.second;
+		clean_texture();
 	}
 
 	bool TextureManager::create_texture(const char* a_key_name, const char* a_filepath)
@@ -38,14 +26,14 @@ namespace uciniti
 		return true;
 	}
 
-	void TextureManager::use_all_textures()
+	void TextureManager::use_texture(const char* a_key_name, int a_index)
 	{
-		int index = 0;
-		for (auto& this_pair : m_texture_map_list)
-		{
-			this_pair.second->bind_texture(index);
-			index++;
-		}
+		m_texture_map_list[a_key_name]->bind_texture(a_index);
+	}
+
+	Texture* TextureManager::get_texture(const char* a_key_name)
+	{
+		return m_texture_map_list[a_key_name];;
 	}
 
 	void TextureManager::get_all_texture_names()
@@ -57,4 +45,13 @@ namespace uciniti
 			index++;
 		}
 	}
+
+	void TextureManager::clean_texture()
+	{
+		// Delete Texture* pointers
+		for (std::pair<std::string, Texture*> this_pair : m_texture_map_list)
+			delete this_pair.second;
+	}
+
+	std::map<std::string, Texture*> TextureManager::m_texture_map_list;
 }

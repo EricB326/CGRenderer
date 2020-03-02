@@ -3,8 +3,6 @@
 
 namespace uciniti
 {
-	TextureManager& texture_inst = TextureManager::inst();
-
 	Material::Material()
 		: m_ambient(glm::vec3(1.0f)), m_diffuse(glm::vec3(1.0f)), m_specular(glm::vec3(1.0f)), m_emissive(glm::vec3(1.0f)), m_specular_shininess(32.0f), m_alpha(1.0f),
 		m_alpha_map(nullptr), m_ambient_map(nullptr), m_bump_map(nullptr), m_diffuse_map(nullptr), m_displacement_map(nullptr), m_specular_highlight_map(nullptr), m_specular_map(nullptr)

@@ -248,7 +248,7 @@ namespace uciniti
 
 		}
 
-		MaterialManager::inst().create_material(a_material_name, loaded_mesh_materials, loaded_specular_shininess, loaded_alpha);
+		MaterialManager::create_material(a_material_name, loaded_mesh_materials, loaded_specular_shininess, loaded_alpha);
 
 		for (const auto& material : materials)
 		{
@@ -367,10 +367,6 @@ namespace uciniti
 
 			// Calculate handedness (direction of bitangent)
 			a_vertices[a].m_tangent.w = (glm::dot(glm::cross(glm::vec3(n), glm::vec3(t)), glm::vec3(tan2[a])) < 0.0F) ? 1.0F : -1.0F;
-
-			// calculate bitangent (ignoring for our Vertex, here just for reference)
-			//vertices[a].bitangent = glm::vec4(glm::cross(glm::vec3(vertices[a].normal), glm::vec3(vertices[a].tangent)) * vertices[a].tangent.w, 0);
-			//vertices[a].tangent.w = 0;
 		}
 
 		//// Store the amount of vertices.
@@ -621,9 +617,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("alpha_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("alpha_map"), material_map_type::ALPHA_MAP);
+			TextureManager::create_texture("alpha_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("alpha_map"), material_map_type::ALPHA_MAP);
 		}
 
 		if (a_material.ambient_texname != "\0")
@@ -635,9 +630,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("ambient_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("ambient_map"), material_map_type::AMBIENT_MAP);
+			TextureManager::create_texture("ambient_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("ambient_map"), material_map_type::AMBIENT_MAP);
 		}
 
 		if (a_material.bump_texname != "\0")
@@ -649,9 +643,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 			
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("bump_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("bump_map"), material_map_type::BUMP_MAP);
+			TextureManager::create_texture("bump_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("bump_map"), material_map_type::BUMP_MAP);
 		}
 
 		if (a_material.diffuse_texname != "\0")
@@ -663,9 +656,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("diffuse_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("diffuse_map"), material_map_type::DIFFUSE_MAP);
+			TextureManager::create_texture("diffuse_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("diffuse_map"), material_map_type::DIFFUSE_MAP);
 		}
 
 		if (a_material.displacement_texname != "\0")
@@ -677,9 +669,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("displacement_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("displacement_map"), material_map_type::DISPLACEMENT_MAP);
+			TextureManager::create_texture("displacement_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("displacement_map"), material_map_type::DISPLACEMENT_MAP);
 		}
 
 		if (a_material.specular_highlight_texname != "\0")
@@ -691,9 +682,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("specular_highlight_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("specular_highlight_map"), material_map_type::SPECULAR_HIGHLIGHT_MAP);
+			TextureManager::create_texture("specular_highlight_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("specular_highlight_map"), material_map_type::SPECULAR_HIGHLIGHT_MAP);
 		}
 
 		if (a_material.specular_texname != "\0")
@@ -705,9 +695,8 @@ namespace uciniti
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
 
 			// Pass the texture file data.
-			TextureManager& texture = TextureManager::inst();
-			texture.create_texture("specular_map", new_texture_path.c_str());
-			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("specular_map"), material_map_type::SPECULAR_MAP);
+			TextureManager::create_texture("specular_map", new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("specular_map"), material_map_type::SPECULAR_MAP);
 		}
 	}
 

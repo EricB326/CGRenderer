@@ -3,28 +3,20 @@
 
 namespace uciniti
 {
-	MaterialManager::MaterialManager()
-	{}
-
-
 	MaterialManager::~MaterialManager()
 	{
 		clean_material();
 	}
 
-	MaterialManager& MaterialManager::inst()
-	{
-		// If no instance exists, create one.
-		static MaterialManager inst;
-
-		// Return the instance.
-		return inst;
-	}
-
 	bool MaterialManager::create_material(const char* a_key_name, std::vector<glm::vec3>& a_material_list, const float a_spec_shininess, const float a_alpha)
 	{
-		Material* new_material = new Material();
+		if (does_key_exist(a_key_name))
+		{
+			printf("ERROR: create_material() call. Material key name '%s' already exists.\n", a_key_name);
+			return false;
+		}
 
+		Material* new_material = new Material();
 		new_material->set_mat_attributes(a_material_list[0], a_material_list[1], a_material_list[2], a_material_list[3], a_spec_shininess, a_alpha);
 
 		m_material_map_list[a_key_name] = new_material;
@@ -42,6 +34,7 @@ namespace uciniti
 			return;
 		}
 
+		// Add the correct map type.
 		switch (a_map_type)
 		{
 		case material_map_type::ALPHA_MAP:
@@ -69,6 +62,11 @@ namespace uciniti
 			printf("ERROR: add_loaded_map() call. Could not find specified material map type.\n");
 			return;
 		}
+	}
+
+	Material* MaterialManager::get_material(const char* a_key_name)
+	{
+		return m_material_map_list[a_key_name];
 	}
 
 	Texture* MaterialManager::get_material_map(const char* a_key_name, material_map_type a_map_type)
@@ -123,4 +121,6 @@ namespace uciniti
 		for (std::pair<std::string, Material*> this_pair : m_material_map_list)
 			delete this_pair.second;
 	}
+
+	std::map<std::string, Material*> MaterialManager::m_material_map_list;
 }
