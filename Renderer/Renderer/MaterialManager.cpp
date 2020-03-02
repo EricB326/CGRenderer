@@ -6,6 +6,7 @@ namespace uciniti
 	MaterialManager::MaterialManager()
 	{}
 
+
 	MaterialManager::~MaterialManager()
 	{
 		clean_material();
@@ -29,6 +30,91 @@ namespace uciniti
 		m_material_map_list[a_key_name] = new_material;
 
 		return true;
+	}
+
+	void MaterialManager::add_loaded_map(const char* a_key_name, Texture* a_loaded_map, material_map_type a_map_type)
+	{
+		// Verify the key actually exists to have a map
+		// added to it.
+		if (!does_key_exist(a_key_name))
+		{
+			printf("ERROR: add_loaded_map() call. Could not find any material map key: '%s'.\n", a_key_name);
+			return;
+		}
+
+		switch (a_map_type)
+		{
+		case material_map_type::ALPHA_MAP:
+			m_material_map_list[a_key_name]->set_alpha_map(a_loaded_map);
+			break;
+		case material_map_type::AMBIENT_MAP:
+			m_material_map_list[a_key_name]->set_ambient_map(a_loaded_map);
+			break;
+		case material_map_type::BUMP_MAP:
+			m_material_map_list[a_key_name]->set_bump_map(a_loaded_map);
+			break;
+		case material_map_type::DIFFUSE_MAP:
+			m_material_map_list[a_key_name]->set_diffuse_map(a_loaded_map);
+			break;
+		case material_map_type::DISPLACEMENT_MAP:
+			m_material_map_list[a_key_name]->set_displacement_map(a_loaded_map);
+			break;
+		case material_map_type::SPECULAR_HIGHLIGHT_MAP:
+			m_material_map_list[a_key_name]->set_specular_highlight_map(a_loaded_map);
+			break;
+		case material_map_type::SPECULAR_MAP:
+			m_material_map_list[a_key_name]->set_specular_map(a_loaded_map);
+			break;
+		default:
+			printf("ERROR: add_loaded_map() call. Could not find specified material map type.\n");
+			return;
+		}
+	}
+
+	Texture* MaterialManager::get_material_map(const char* a_key_name, material_map_type a_map_type)
+	{
+		// Verify the key actually exists to have a map
+		// added to it.
+		if (!does_key_exist(a_key_name))
+		{
+			printf("ERROR: get_material_map() call. Could not find any material map key: '%s'.\n", a_key_name);
+			return nullptr;
+		}
+
+		switch (a_map_type)
+		{
+		case material_map_type::ALPHA_MAP:
+			return m_material_map_list[a_key_name]->get_alpha_map();
+		case material_map_type::AMBIENT_MAP:
+			return m_material_map_list[a_key_name]->get_ambient_map();
+		case material_map_type::BUMP_MAP:
+			return m_material_map_list[a_key_name]->get_bump_map();
+		case material_map_type::DIFFUSE_MAP:
+			return m_material_map_list[a_key_name]->get_diffuse_map();
+		case material_map_type::DISPLACEMENT_MAP:
+			return m_material_map_list[a_key_name]->get_displacement_map();
+		case material_map_type::SPECULAR_HIGHLIGHT_MAP:
+			return m_material_map_list[a_key_name]->get_specular_highlight_map();
+		case material_map_type::SPECULAR_MAP:
+			return m_material_map_list[a_key_name]->get_specular_map();
+		default:
+			printf("ERROR: get_material_map() call. Could not find specified material map type.\n");
+			return nullptr;
+		}
+	}
+
+	bool MaterialManager::does_key_exist(const char* a_key_name)
+	{
+		// Using the .find() search for the key passed through.
+		// The iterator stores the address of the key value pair.
+		auto material_list_iterator = m_material_map_list.find(a_key_name);
+
+		// If we reached the end of the m_material_map_list, the key was
+		// not found in the map.
+		if (material_list_iterator == m_material_map_list.end())
+			return false; // Return false, key doesn't exist.
+		else
+			return true; // Return true, key was found.
 	}
 
 	void MaterialManager::clean_material()

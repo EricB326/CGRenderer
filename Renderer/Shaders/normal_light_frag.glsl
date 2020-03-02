@@ -22,9 +22,8 @@ struct directional_light
 
 struct material
 {
+	sampler2D base_texture;
 	sampler2D bump_map;
-	sampler2D diffuse_map;
-	sampler2D specular_map;
 
 	vec3 mat_ambient_colour;
 	vec3 mat_diffuse_colour;
@@ -43,6 +42,8 @@ in vec3 final_average_normals;
 in vec4 final_position;
 in mat3 final_tangent_space;
 
+in vec3 testVal;
+
 out vec4 final_fragment_colour;
 
 vec3 calculate_directional_lights();
@@ -50,17 +51,16 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction);
 
 void main()
 {
-	vec3 final_bump_map = texture(uniform_material.bump_map, final_texture_coords).rgb;
-	final_bump_map = normalize(final_bump_map);// * 2.0f - 1.0f);
-	//final_bump_map = normalize(final_bump_map * final_tangent_space);
+	vec3 final_texture = texture(uniform_material.base_texture, final_texture_coords).rgb;
 	
-	vec3 final_diffuse_map = texture(uniform_material.diffuse_map, final_texture_coords).rgb;
-	vec3 final_specular_map = texture(uniform_material.specular_map, final_texture_coords).rgb;
+	vec3 final_bump_map = texture(uniform_material.bump_map, final_texture_coords).rgb;
+	final_bump_map = normalize(final_bump_map * 2.0 - 1.0);
+	final_bump_map = normalize(final_bump_map * final_tangent_space);
 
 	vec3 final_light_colour = calculate_directional_lights();
 	
-	//final_fragment_colour = vec4((final_bump_map * final_diffuse_map * final_specular_map) * final_light_colour, 1.0f);
-	final_fragment_colour = vec4(final_bump_map, 1.0f);
+	final_fragment_colour = vec4(final_texture * final_bump_map * final_light_colour, 1.0f);
+	final_fragment_colour = vec4(final_bump_map, 1.0);
 }
 
 vec3 calculate_directional_lights()
@@ -71,7 +71,7 @@ vec3 calculate_directional_lights()
 vec3 calculate_directional_light(light a_light, vec3 a_direction)
 {	
 	// Calculate the ambient.
-	vec3 ambient_colour = a_light.light_ambient_colour * uniform_material.mat_ambient_colour * a_light.light_ambient_intensity;
+	vec3 ambient_colour = a_light.light_ambient_colour * a_light.light_ambient_intensity;
 	
 	// Normalize direction and average normals.
 	vec3 normals = normalize(final_average_normals);
@@ -81,7 +81,7 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 	float lambert_term = max(0.0f, min(1.0f, dot(normals, -a_direction)));
 	
 	// Calculate the diffuse.
-	vec3 diffuse_colour = a_light.light_diffuse_colour * uniform_material.mat_diffuse_colour * lambert_term * a_light.light_diffuse_intensity;
+	vec3 diffuse_colour = a_light.light_diffuse_colour * lambert_term * a_light.light_diffuse_intensity;
 	
 	// Only calculate specular as long as there is diffuse lighting.
 	vec3 specular_colour = vec3(0.0f, 0.0f, 0.0f);
@@ -95,7 +95,7 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 		float specular_term = pow(max(0.0f, dot(reflection, frag_to_cam)), uniform_material.mat_specular_shininess);
 		
 		// Calculate the specular.
-		specular_colour = vec3(a_light.light_specular_colour * uniform_material.mat_specular_colour * specular_term * a_light.light_specular_intensity);
+		specular_colour = vec3(a_light.light_specular_colour * specular_term * a_light.light_specular_intensity);
 	}
 						  
 	

@@ -20,7 +20,7 @@ namespace uciniti
 		to the header file as the functions the library uses are only usable when the
 		implementation is within the same file.
 	*/
-	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip);
+	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip, const char* a_material_name);
 
 	Mesh::Mesh()
 		: m_empty_mesh(true), m_is_geometry_user_defined(false), m_VAO(0), m_VBO(0), m_EBO(0), m_index_count(0)
@@ -246,10 +246,14 @@ namespace uciniti
 			loaded_specular_shininess = material.shininess;
 			loaded_alpha = material.dissolve;
 
-			create_texture_maps(material, a_should_textures_flip);
 		}
 
 		MaterialManager::inst().create_material(a_material_name, loaded_mesh_materials, loaded_specular_shininess, loaded_alpha);
+
+		for (const auto& material : materials)
+		{
+			create_texture_maps(material, a_should_textures_flip, a_material_name);
+		}
 
 		// Pass data to the correct struct class.
 		for (const auto& shape : shapes)
@@ -270,15 +274,18 @@ namespace uciniti
 			// Populate the vertex.
 			for (size_t i = 0; i < vert_count; i++)
 			{
-				// If there is mesh positional data, populate the position vec3.
+				// If there is mesh positional data, populate the position.
 				if (!shape.mesh.positions.empty())
 					m_standard_vert[i].m_position = glm::vec4(shape.mesh.positions[i * 3], shape.mesh.positions[i * 3 + 1], shape.mesh.positions[i * 3 + 2], 1.0f);
-				// If there is mesh normals data, populate the normal vec3.
-				if (!shape.mesh.normals.empty())
-					m_standard_vert[i].m_normal = glm::vec4(shape.mesh.normals[i * 3], shape.mesh.normals[i * 3 + 1], shape.mesh.normals[i * 3 + 2], 0.0f);
 				// Invert the texture if the texture requires it.
 				if (!shape.mesh.texcoords.empty())
-					m_standard_vert[i].m_tex_coords = glm::vec2(shape.mesh.texcoords[i * 2 + 0], a_should_textures_flip ? 1.0f - shape.mesh.texcoords[i * 2 + 1] : shape.mesh.texcoords[i * 2 + 1]);
+					m_standard_vert[i].m_tex_coords = glm::vec2(shape.mesh.texcoords[i * 2], a_should_textures_flip ? 1.0f - shape.mesh.texcoords[i * 2 + 1] : shape.mesh.texcoords[i * 2 + 1]);
+				// If there is mesh normals data, populate the normal.
+				if (!shape.mesh.normals.empty())
+					m_standard_vert[i].m_normal = glm::vec4(shape.mesh.normals[i * 3], shape.mesh.normals[i * 3 + 1], shape.mesh.normals[i * 3 + 2], 0.0f);
+
+				//printf("Index: %i - norm0: %f | norm1: %f | norm2: %f", i, shape.mesh.normals[i * 3], shape.mesh.normals[i * 3 + 1], shape.mesh.normals[i * 3 + 2]);
+				//printf("\n");
 			}
 
 			// Calculate tangents for normal mapping.
@@ -305,68 +312,133 @@ namespace uciniti
 		   Availability: http://foundationsofgameenginedev.com/
 		*/
 
-		// Store the amount of vertices.
-		uint vertex_count = (uint)a_vertices.size();
-		
-		// Allocate storage for the tangents and bitangents.
-		glm::vec4* tangent = new glm::vec4[vertex_count * 2];
-		glm::vec4* bitangent = tangent + vertex_count;
-		
-		// Initialize the tangent and bitangent vectors to zero.
-		for (size_t i = 0; i < vertex_count; i++)
-		{
-			tangent[i] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-			bitangent[i] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		unsigned int vertexCount = (unsigned int)a_vertices.size();
+		glm::vec4* tan1 = new glm::vec4[vertexCount * 2];
+		glm::vec4* tan2 = tan1 + vertexCount;
+		memset(tan1, 0, vertexCount * sizeof(glm::vec4) * 2);
+
+		unsigned int indexCount = a_index_count;
+		for (unsigned int a = 0; a < indexCount; a += 3) {
+			long i1 = a_indices[a];
+			long i2 = a_indices[a + 1];
+			long i3 = a_indices[a + 2];
+
+			const glm::vec4& v1 = a_vertices[i1].m_position;
+			const glm::vec4& v2 = a_vertices[i2].m_position;
+			const glm::vec4& v3 = a_vertices[i3].m_position;
+
+			const glm::vec2& w1 = a_vertices[i1].m_tex_coords;
+			const glm::vec2& w2 = a_vertices[i2].m_tex_coords;
+			const glm::vec2& w3 = a_vertices[i3].m_tex_coords;
+
+			float x1 = v2.x - v1.x;
+			float x2 = v3.x - v1.x;
+			float y1 = v2.y - v1.y;
+			float y2 = v3.y - v1.y;
+			float z1 = v2.z - v1.z;
+			float z2 = v3.z - v1.z;
+
+			float s1 = w2.x - w1.x;
+			float s2 = w3.x - w1.x;
+			float t1 = w2.y - w1.y;
+			float t2 = w3.y - w1.y;
+
+			float r = 1.0F / (s1 * t2 - s2 * t1);
+			glm::vec4 sdir((t2 * x1 - t1 * x2) * r, (t2 * y1 - t1 * y2) * r,
+				(t2 * z1 - t1 * z2) * r, 0);
+			glm::vec4 tdir((s1 * x2 - s2 * x1) * r, (s1 * y2 - s2 * y1) * r,
+				(s1 * z2 - s2 * z1) * r, 0);
+
+			tan1[i1] += sdir;
+			tan1[i2] += sdir;
+			tan1[i3] += sdir;
+
+			tan2[i1] += tdir;
+			tan2[i2] += tdir;
+			tan2[i3] += tdir;
 		}
-		
-		// Calculate tangent and bitangent for each triangle.
-		for (size_t i = 0; i < a_index_count; i += 3)
-		{
-			long index0 = a_indices[i];
-			long index1 = a_indices[i + 1];
-			long index2 = a_indices[i + 2];
-			
-			const glm::vec3& point0 = a_vertices[index0].m_position;
-			const glm::vec3& point1 = a_vertices[index1].m_position;
-			const glm::vec3& point2 = a_vertices[index2].m_position;
-			
-			const glm::vec2& w0 = a_vertices[index0].m_tex_coords;
-			const glm::vec2& w1 = a_vertices[index1].m_tex_coords;
-			const glm::vec2& w2 = a_vertices[index2].m_tex_coords;
-			
-			glm::vec3 e1 = point1 - point0, e2 = point2 - point0;
-			float x1 = w1.x - w0.x, x2 = w2.x - w0.x;
-			float y1 = w1.y - w0.y, y2 = w2.y - w0.y;
-			
-			float r = 1.0f / (x1 * y2 - x2 * y1);
-			glm::vec3 t = (e1 * y2 - e2 * y1) * r;
-			glm::vec3 b = (e2 * x1 - e1 * x2) * r;
-			
-			tangent[index0] += glm::vec4(t, 0.0f);
-			tangent[index2] += glm::vec4(t, 0.0f);
-			tangent[index1] += glm::vec4(t, 0.0f);
-			
-			bitangent[index0] += glm::vec4(b, 0.0f);
-			bitangent[index2] += glm::vec4(b, 0.0f);
-			bitangent[index1] += glm::vec4(b, 0.0f);
+
+		for (unsigned int a = 0; a < vertexCount; a++) {
+			const glm::vec3& n = glm::vec3(a_vertices[a].m_normal);
+			const glm::vec3& t = glm::vec3(tan1[a]);
+
+			// Gram-Schmidt orthogonalize
+			a_vertices[a].m_tangent = glm::vec4(glm::normalize(t - n * glm::dot(n, t)), 0);
+
+			// Calculate handedness (direction of bitangent)
+			a_vertices[a].m_tangent.w = (glm::dot(glm::cross(glm::vec3(n), glm::vec3(t)), glm::vec3(tan2[a])) < 0.0F) ? 1.0F : -1.0F;
+
+			// calculate bitangent (ignoring for our Vertex, here just for reference)
+			//vertices[a].bitangent = glm::vec4(glm::cross(glm::vec3(vertices[a].normal), glm::vec3(vertices[a].tangent)) * vertices[a].tangent.w, 0);
+			//vertices[a].tangent.w = 0;
 		}
-		
-		// Orthonormalize each tanget and calculate handedness.
-		for (size_t i = 0; i < vertex_count; i++)
-		{
-			const glm::vec3& t = tangent[i];
-			const glm::vec3& b = bitangent[i];
-			const glm::vec3& n = a_vertices[i].m_normal;
-		
-			// Gram-Schmidt orthogonalize.
-			a_vertices[i].m_tangent = glm::vec4(glm::normalize(t - n * glm::dot(n, t)), 0.0f);
-		
-			// Calculate handedness (direction of bitangent).
-			a_vertices[i].m_tangent.w = (glm::dot(glm::cross(t, b), n) > 0.0f) ? 1.0f : -1.0f;
-		}
+
+		//// Store the amount of vertices.
+		//uint vertex_count = (uint)a_vertices.size();
+		//
+		//// Allocate storage for the tangents and bitangents.
+		//glm::vec4* tangent = new glm::vec4[vertex_count * 2];
+		//glm::vec4* bitangent = tangent + vertex_count;
+		//
+		//// Initialize the tangent and bitangent vectors to zero.
+		//for (size_t i = 0; i < vertex_count; i++)
+		//{
+		//	tangent[i] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		//	bitangent[i] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		//}
+		//
+		//// Calculate tangent and bitangent for each triangle.
+		//for (size_t i = 0; i < a_index_count; i += 3)
+		//{
+		//	long index0 = a_indices[i];
+		//	long index1 = a_indices[i + 1];
+		//	long index2 = a_indices[i + 2];
+		//	
+		//	const glm::vec3& point0 = a_vertices[index0].m_position;
+		//	const glm::vec3& point1 = a_vertices[index1].m_position;
+		//	const glm::vec3& point2 = a_vertices[index2].m_position;
+		//	
+		//	const glm::vec2& w0 = a_vertices[index0].m_tex_coords;
+		//	const glm::vec2& w1 = a_vertices[index1].m_tex_coords;
+		//	const glm::vec2& w2 = a_vertices[index2].m_tex_coords;
+		//	
+		//	glm::vec3 e1 = point1 - point0, e2 = point2 - point0;
+		//	float x1 = w1.x - w0.x, x2 = w2.x - w0.x;
+		//	float y1 = w1.y - w0.y, y2 = w2.y - w0.y;
+		//	
+		//	float r = 1.0f / (x1 * y2 - x2 * y1);
+		//	glm::vec3 t = (e1 * y2 - e2 * y1) * r;
+		//	glm::vec3 b = (e2 * x1 - e1 * x2) * r;
+		//	
+		//	tangent[index0] += glm::vec4(t, 0.0f);
+		//	tangent[index2] += glm::vec4(t, 0.0f);
+		//	tangent[index1] += glm::vec4(t, 0.0f);
+		//	
+		//	bitangent[index0] += glm::vec4(b, 0.0f);
+		//	bitangent[index2] += glm::vec4(b, 0.0f);
+		//	bitangent[index1] += glm::vec4(b, 0.0f);
+		//}
+		//
+		//// Orthonormalize each tanget and calculate handedness.
+		//for (size_t i = 0; i < vertex_count; i++)
+		//{
+		//	const glm::vec3& t = tangent[i];
+		//	const glm::vec3& b = bitangent[i];
+		//	const glm::vec3& n = a_vertices[i].m_normal;
+		//
+		//	// Gram-Schmidt orthogonalize.
+		//	a_vertices[i].m_tangent = glm::vec4(glm::normalize(t - n * glm::dot(n, t)), 0.0f);
+		//
+		//	// Calculate handedness (direction of bitangent).
+		//	a_vertices[i].m_tangent.w = (glm::dot(glm::cross(t, b), n) > 0.0f) ? 1.0f : -1.0f;
+		//
+		//	//printf("tan0: %i | tan1: %i | tan2: %i | tan3: %i", a_vertices[i].m_tangent.x, a_vertices[i].m_tangent.y, a_vertices[i].m_tangent.z, a_vertices[i].m_tangent.w);
+		//	//printf("\n");
+		//}
 		
 		// Clean memory
-		delete[] tangent;
+		delete[] tan1;
+		//delete[] tangent;
 	}
 
 	void Mesh::setup_base_mesh(GLuint a_vao, GLuint a_vbo, GLuint a_ebo, const uint* a_indices)
@@ -538,7 +610,7 @@ namespace uciniti
 		glBindVertexArray(0);
 	}
 
-	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip)
+	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip, const char* a_material_name)
 	{
 		if (a_material.alpha_texname != "\0")
 		{
@@ -551,6 +623,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("alpha_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("alpha_map"), material_map_type::ALPHA_MAP);
 		}
 
 		if (a_material.ambient_texname != "\0")
@@ -564,6 +637,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("ambient_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("ambient_map"), material_map_type::AMBIENT_MAP);
 		}
 
 		if (a_material.bump_texname != "\0")
@@ -577,6 +651,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("bump_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("bump_map"), material_map_type::BUMP_MAP);
 		}
 
 		if (a_material.diffuse_texname != "\0")
@@ -590,6 +665,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("diffuse_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("diffuse_map"), material_map_type::DIFFUSE_MAP);
 		}
 
 		if (a_material.displacement_texname != "\0")
@@ -603,6 +679,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("displacement_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("displacement_map"), material_map_type::DISPLACEMENT_MAP);
 		}
 
 		if (a_material.specular_highlight_texname != "\0")
@@ -616,6 +693,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("specular_highlight_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("specular_highlight_map"), material_map_type::SPECULAR_HIGHLIGHT_MAP);
 		}
 
 		if (a_material.specular_texname != "\0")
@@ -629,6 +707,7 @@ namespace uciniti
 			// Pass the texture file data.
 			TextureManager& texture = TextureManager::inst();
 			texture.create_texture("specular_map", new_texture_path.c_str());
+			MaterialManager::inst().add_loaded_map(a_material_name, texture.get_texture("specular_map"), material_map_type::SPECULAR_MAP);
 		}
 	}
 

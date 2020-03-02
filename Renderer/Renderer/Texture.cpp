@@ -16,7 +16,7 @@ namespace uciniti
 	{
 		// Load the texture data.
 		unsigned char* texture_data = stbi_load(a_filepath, &m_width, &m_height, &m_bit_depth, STBI_default);
-
+		
 		// If there is no texture_data, the file failed to load.
 		if (!texture_data)
 			return false;
