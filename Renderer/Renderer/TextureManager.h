@@ -19,12 +19,15 @@ namespace uciniti
 
 		static Texture* get_texture(const char* a_key_name);
 
-		static void clean_texture();
-
 		static void get_all_texture_names();
+
+		static void delete_all_textures();
+		static void delete_texture_at(const char* a_key_name);
 
 	private:
 		static std::map<std::string, Texture*> m_texture_map_list;
+
+		static bool does_key_exist(const char* a_key_name);
 	};
 }
 

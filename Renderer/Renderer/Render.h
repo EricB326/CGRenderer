@@ -17,7 +17,7 @@ namespace uciniti
 	{
 	public:
 		Render();
-		virtual ~Render();
+		~Render();
 
 		virtual void start();
 

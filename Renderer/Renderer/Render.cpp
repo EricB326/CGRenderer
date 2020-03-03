@@ -52,9 +52,9 @@ namespace uciniti
 		enable_test_types();
 
 		// Update the camera each frame.
-		m_main_camera->update(Time::delta_time);
+		m_main_camera->update(Time::get_delta_time());
 
-		set_soulspear(m_model_matrix, Time::total_time);
+		set_soulspear(m_model_matrix, Time::get_total_time());
 	}
 
 	void Render::set_soulspear(glm::mat4 a_model_matrix, double a_current_time)
@@ -162,6 +162,9 @@ namespace uciniti
 
 		delete m_main_light;
 		m_main_light = nullptr;
+
+		MaterialManager::delete_all_materials();
+		TextureManager::delete_all_textures();
 
 		for (auto mesh : m_mesh_list)
 		{

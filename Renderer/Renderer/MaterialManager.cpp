@@ -5,7 +5,7 @@ namespace uciniti
 {
 	MaterialManager::~MaterialManager()
 	{
-		clean_material();
+		delete_all_materials();
 	}
 
 	bool MaterialManager::create_material(const char* a_key_name, std::vector<glm::vec3>& a_material_list, const float a_spec_shininess, const float a_alpha)
@@ -105,21 +105,45 @@ namespace uciniti
 	{
 		// Using the .find() search for the key passed through.
 		// The iterator stores the address of the key value pair.
-		auto material_list_iterator = m_material_map_list.find(a_key_name);
+		auto map_iterator = m_material_map_list.find(a_key_name);
 
 		// If we reached the end of the m_material_map_list, the key was
 		// not found in the map.
-		if (material_list_iterator == m_material_map_list.end())
+		if (map_iterator == m_material_map_list.end())
 			return false; // Return false, key doesn't exist.
 		else
 			return true; // Return true, key was found.
 	}
 
-	void MaterialManager::clean_material()
+	void MaterialManager::delete_all_materials()
 	{
-		// Delete Material* pointers
-		for (std::pair<std::string, Material*> this_pair : m_material_map_list)
-			delete this_pair.second;
+		// Check there is data to delete.
+		if (m_material_map_list.size() > 0)
+		{
+			// Delete all Material* pointers
+			for (std::pair<std::string, Material*> this_pair : m_material_map_list)
+			{
+				delete this_pair.second;
+				this_pair.second = nullptr;
+			}
+		}
+	}
+
+	void MaterialManager::delete_material_at(const char* a_key_name)
+	{
+		if (!does_key_exist(a_key_name))
+		{
+			printf("ERROR: delete_material_at() call. Cannot find key '%s' in material map.\n", a_key_name);
+			return;
+		}
+
+		// Locate the key in the map
+		auto map_iterator = m_material_map_list.find(a_key_name);
+		// Key located, delete it. No point doing an if .end() check.
+		// Already know the key does exist from above.
+		delete map_iterator->second;
+		map_iterator->second = nullptr;
+		m_material_map_list.erase(map_iterator);
 	}
 
 	std::map<std::string, Material*> MaterialManager::m_material_map_list;

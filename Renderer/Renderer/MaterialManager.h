@@ -30,11 +30,12 @@ namespace uciniti
 		static Material* get_material(const char* a_key_name);
 		static Texture* get_material_map(const char* a_key_name, material_map_type a_map_type);
 
+		static void delete_all_materials();
+		static void delete_material_at(const char* a_key_name);
 
 	private:
 		static std::map<std::string, Material*> m_material_map_list;
 
 		static bool does_key_exist(const char* a_key_name);
-		static void clean_material();
 	};
 }
