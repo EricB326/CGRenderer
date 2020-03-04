@@ -51,6 +51,8 @@ namespace uciniti
 		// Enable test types (depth test, etc).
 		enable_test_types();
 
+		m_main_light->set_light_direction(glm::vec3(cosf((float)Time::get_total_time()), 0.0f, sinf((float)Time::get_total_time())));
+
 		// Update the camera each frame.
 		m_main_camera->update(Time::get_delta_time());
 
@@ -84,6 +86,10 @@ namespace uciniti
 		//model = glm::scale(model, glm::vec3(0.01f, 0.01f, 0.01f));
 
 		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("soulspear_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
+
+		glm::mat3 normal_matrix = glm::inverseTranspose(a_model_matrix);
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("soulspear_program"), "normal_matrix", uciniti::uniform_type::UNIFORM_MATRIX_3fv, 1, glm::value_ptr(normal_matrix), false);
+
 
 		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("soulspear_program"), "uniform_material.bump_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::BUMP_MAP)->get_handle() - 1);
 		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("soulspear_program"), "uniform_material.diffuse_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::DIFFUSE_MAP)->get_handle() - 1);
@@ -132,10 +138,17 @@ namespace uciniti
 	bool Render::create_lights()
 	{
 		m_main_light = new DirectionalLight(glm::vec3(1.0f, 0.0f, -1.0f),
-											glm::vec3(0.1745f, 0.01175f, 0.01175f),
+											glm::vec3(1.0f, 1.0f, 1.0f),
 											glm::vec3(0.61424f, 0.04136f, 0.04136f),
 											glm::vec3(0.727811f, 0.626959f, 0.626959f),
-											0.05f, 1.3f, 0.6f);
+											0.4f, 1.0f, 1.0f);
+		
+
+		//m_main_light = new DirectionalLight(glm::vec3(1.0f, 0.0f, -1.0f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	glm::vec3(1.0f, 1.0f, 1.0f),
+		//	1.0f, 1.0f, 1.0f);
 
 		return true;
 	}
