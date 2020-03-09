@@ -78,10 +78,10 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 	// Calculate lambert term (negate the lights direction).
 	float lambert_term = max(0.0f, min(1.0f, dot(normals, -a_direction)));
 	
-	// Calculate the diffuse.
-	vec3 diffuse_colour = (a_light.light_diffuse_colour * uniform_material.mat_diffuse_colour  // Diffuse colours.
-						   * lambert_term  // Diffuse map material and lambert term.
-						   * a_light.light_diffuse_intensity); // Intensity of the diffuse colour.
+	// Calculate the diffuse.					   
+	vec3 diffuse_colour = ((a_light.light_diffuse_colour * (uniform_material.mat_diffuse_colour // Diffuse colours multiplied,
+						   * lambert_term))  													// Lambert term multiplied,
+						   * a_light.light_diffuse_intensity);								    // Intensity of the diffuse colour.		   
 	
 	// Only calculate specular as long as there is diffuse lighting.
 	vec3 specular_colour = vec3(0.0f, 0.0f, 0.0f);
@@ -95,9 +95,9 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 		float specular_term = pow(max(0.0f, dot(reflection, frag_to_cam)), uniform_material.mat_specular_shininess);
 		
 		// Calculate the specular.
-		specular_colour = vec3(a_light.light_specular_colour * uniform_material.mat_specular_colour // Specular colours.
-							   * final_specular_map * specular_term // Specular map material and specular term
-							   * a_light.light_specular_intensity); // Intensity of the specular colour.
+		specular_colour = vec3((a_light.light_specular_colour * uniform_material.mat_specular_colour // Specular colours multiplied,
+							   * final_specular_map * specular_term) 								 // Specular map & specular term multiplied,
+							   * a_light.light_specular_intensity); 								 // Intensity of the specular colour.
 	}
 						  
 	

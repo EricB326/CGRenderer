@@ -3,13 +3,14 @@
 
 /* User defined includes
 */
+#include "common.h"
 #include "Mesh.h"
 #include "ShaderManager.h"
 #include "FreeCamera.h"
 #include "TextureManager.h"
 #include "MaterialManager.h"
 #include "DirectionalLight.h"
-
+#include "PointLight.h"
 
 namespace uciniti
 {
@@ -29,9 +30,14 @@ namespace uciniti
 		std::vector<Mesh*> m_mesh_list;
 		ShaderManager* m_shaders;
 		DirectionalLight* m_main_light;
+		PointLight* m_point_lights[MAX_POINT_LIGHTS];
+		int m_point_light_count;
 		glm::mat4 m_model_matrix;
 
+		void set_lights(glm::mat4 a_model_matrix, double a_current_time);
 		void set_soulspear(glm::mat4 a_model_matrix, double a_current_time);
+		void set_red_lamp(glm::mat4 a_model_matrix, double a_current_time, glm::vec3 a_position);
+		void set_blue_lamp(glm::mat4 a_model_matrix, double a_current_time, glm::vec3 a_position);
 
 		bool create_geometry();
 		bool create_textures();

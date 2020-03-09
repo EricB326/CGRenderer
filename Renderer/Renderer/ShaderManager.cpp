@@ -180,6 +180,9 @@ namespace uciniti
 		case uciniti::uniform_type::UNIFORM_3f:
 			glUniform3f(glGetUniformLocation(a_program_id, a_uniform_location), a_data_to_pass[0], a_data_to_pass[1], a_data_to_pass[2]);
 			break;
+		case uciniti::uniform_type::UNIFORM_4f:
+			glUniform4f(glGetUniformLocation(a_program_id, a_uniform_location), a_data_to_pass[0], a_data_to_pass[1], a_data_to_pass[2], a_data_to_pass[3]);
+			break;
 		default:
 			printf("ERROR: bind_uniform_data() call. Could not find matrix uniform type passed.\n");
 			break;

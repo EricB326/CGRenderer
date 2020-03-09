@@ -51,34 +51,72 @@ namespace uciniti
 		// Enable test types (depth test, etc).
 		enable_test_types();
 
-		m_main_light->set_light_direction(glm::vec3(cosf((float)Time::get_total_time()), 0.0f, sinf((float)Time::get_total_time())));
-
 		// Update the camera each frame.
 		m_main_camera->update(Time::get_delta_time());
 
+		// Set lights data and render.
+		set_lights(m_model_matrix, Time::get_current_time());
+
+		// Set lamp data and render.
+		set_red_lamp(m_model_matrix, Time::get_total_time(), glm::vec3(0.0f, 0.0f, 0.0f));
+		set_blue_lamp(m_model_matrix, Time::get_total_time(), glm::vec3(0.0f, 0.0f, 0.0f));
+
+		// Set soulspear data and render.
 		set_soulspear(m_model_matrix, Time::get_total_time());
+	}
+
+	void Render::set_lights(glm::mat4 a_model_matrix, double a_current_time)
+	{
+		// Direction light section.
+		// Colours.
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_ambient_colour()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_diffuse_colour()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_specular_colour()));
+
+		// Intensities.
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.ambient_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_ambient_intensity(), 0);
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.diffuse_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_diffuse_intensity(), 0);
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.specular_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_specular_intensity(), 0);
+
+		// Direction.
+		//m_main_light->set_light_direction(glm::vec3(glm::cos(a_current_time), 0.0f, glm::sin(a_current_time)));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.direction", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_light_direction()));
+
+		// Point lights section.
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "point_light_count", uciniti::uniform_type::UNIFORM_1i, 0, m_point_light_count);
+		for (size_t i = 0; i < m_point_light_count; i++)
+		{
+			std::string light_index = "point_lights[" + std::to_string(i) + "].";
+
+			// Colours.
+			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.ambient_colour").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_ambient_colour()));
+			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.diffuse_colour").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_diffuse_colour()));
+			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.specular_colour").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_specular_colour()));
+
+			// Intensities.
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.ambient_intensity").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_ambient_intensity(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.diffuse_intensity").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_diffuse_intensity(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.specular_intensity").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_specular_intensity(), 0);
+
+			// Position.
+			m_point_lights[0]->set_light_position(glm::vec3(glm::cos(a_current_time), 0.0f, (glm::sin(a_current_time) - 3.0f)));
+			m_point_lights[1]->set_light_position(glm::vec3(glm::sin(a_current_time * 3.0f), (glm::cos(a_current_time * 3.0f) * 2.0f), (glm::sin(a_current_time * 3.0f) - 3.0f)));
+			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "position").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_light_position()));
+
+			// Attenuation.
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "constant").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_light_constant(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "linear").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_light_linear(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "exponent").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_light_exponent(), 0);
+		}
 	}
 
 	void Render::set_soulspear(glm::mat4 a_model_matrix, double a_current_time)
 	{
 		// User created shader program.
-		m_shaders->use_program("soulspear_program");
+		m_shaders->use_program("lambertian_program");
 
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("soulspear_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
-		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("soulspear_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
-		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("soulspear_program"), "view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_view_matrix()), false);
-		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("soulspear_program"), "projection_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection()), false);
-
-		// Light section.
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.base.light_ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_ambient_colour()));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.base.light_diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_diffuse_colour()));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.base.light_specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_specular_colour()));
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.base.light_ambient_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_ambient_intensity(), 0);
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.base.light_diffuse_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_diffuse_intensity(), 0);
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.base.light_specular_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_specular_intensity(), 0);
-
-		//main_light.set_light_direction(glm::normalize(glm::vec3(0.0f, glm::sin(a_current_time * 1.0f), glm::cos(a_current_time * 1.0f))));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_directional_light.light_direction", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_light_direction()));
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
 
 		a_model_matrix = glm::mat4(1.0f);
 		a_model_matrix = glm::translate(a_model_matrix, glm::vec3(0.0f, -1.0f, -3.0f));
@@ -91,26 +129,66 @@ namespace uciniti
 		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("soulspear_program"), "normal_matrix", uciniti::uniform_type::UNIFORM_MATRIX_3fv, 1, glm::value_ptr(normal_matrix), false);
 
 
-		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("soulspear_program"), "uniform_material.bump_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::BUMP_MAP)->get_handle() - 1);
-		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("soulspear_program"), "uniform_material.diffuse_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::DIFFUSE_MAP)->get_handle() - 1);
-		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("soulspear_program"), "uniform_material.specular_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::SPECULAR_MAP)->get_handle() - 1);
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_material.mat_ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("soulspear_material")->get_ambient()));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_material.mat_diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("soulspear_material")->get_diffuse()));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("soulspear_program"), "uniform_material.mat_specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("soulspear_material")->get_specular()));
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("soulspear_program"), "uniform_material.mat_specular_shininess", uciniti::uniform_type::UNIFORM_1f, uciniti::MaterialManager::get_material("soulspear_material")->get_specular_shininess(), 0);
+		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.bump_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::BUMP_MAP)->get_handle() - 1);
+		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.albedo_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("soulspear_material", uciniti::material_map_type::DIFFUSE_MAP)->get_handle() - 1);
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("soulspear_material")->get_ambient()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("soulspear_material")->get_diffuse()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("soulspear_material")->get_specular()));
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_shininess", uciniti::uniform_type::UNIFORM_1f, uciniti::MaterialManager::get_material("soulspear_material")->get_specular_shininess(), 0);
 
 		TextureManager::use_texture("bump_map", 0);
 		TextureManager::use_texture("diffuse_map", 1);
-		TextureManager::use_texture("specular_map", 2);
+		m_mesh_list[2]->render_mesh();
+	}
+
+	void Render::set_red_lamp(glm::mat4 a_model_matrix, double a_current_time, glm::vec3 a_position)
+	{
+		// User created shader program.
+		m_shaders->use_program("lamp_program");
+
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lamp_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);		
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lamp_program"), "lamp_colour", uciniti::uniform_type::UNIFORM_4f, glm::value_ptr(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+
+		a_model_matrix = glm::mat4(1.0f);
+		a_model_matrix = glm::translate(a_model_matrix, m_point_lights[0]->get_light_position());
+		a_model_matrix = glm::scale(a_model_matrix, glm::vec3(0.01f, 0.01f, 0.01f));
+
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
+
 		m_mesh_list[0]->render_mesh();
+	}
+
+	void Render::set_blue_lamp(glm::mat4 a_model_matrix, double a_current_time, glm::vec3 a_position)
+	{
+		// User created shader program.
+		m_shaders->use_program("lamp_program");
+
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lamp_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lamp_program"), "lamp_colour", uciniti::uniform_type::UNIFORM_4f, glm::value_ptr(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)));
+
+		a_model_matrix = glm::mat4(1.0f);
+		a_model_matrix = glm::translate(a_model_matrix, m_point_lights[1]->get_light_position());
+		a_model_matrix = glm::scale(a_model_matrix, glm::vec3(0.01f, 0.01f, 0.01f));
+
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
+
+		m_mesh_list[1]->render_mesh();
 	}
 
 	bool Render::create_geometry()
 	{
+		Mesh* red_lamp = new Mesh();
+		Mesh* blue_lamp = new Mesh();
 		Mesh* soulspear = new Mesh();
 
+		if (!red_lamp->load_obj("..//Models//Free3D//Crate//crate.obj", "red_lamp_material")) { return false; }
+		if (!blue_lamp->load_obj("..//Models//Free3D//Crate//crate.obj", "blue_lamp_material")) { return false; }
 		if (!soulspear->load_obj("..//Models//Soulspear//soulspear.obj", "soulspear_material", true, true)) { return false; }
 
+		m_mesh_list.push_back(red_lamp);
+		m_mesh_list.push_back(blue_lamp);
 		m_mesh_list.push_back(soulspear);
 
 		return true;
@@ -125,11 +203,21 @@ namespace uciniti
 	{
 		m_shaders = new ShaderManager();
 
+		// Load lamp shader.
+		if (!m_shaders->load_shader("lamp_vert", uciniti::shader_type::VERTEX, "..//Shaders//lamp_vert.glsl")) { return false; }
+		if (!m_shaders->load_shader("lamp_frag", uciniti::shader_type::FRAGMENT, "..//Shaders//lamp_frag.glsl")) { return false; }
+
+		// Load Lambertian shader.
+		if (!m_shaders->load_shader("lambertian_vert", uciniti::shader_type::VERTEX, "..//Shaders//lambertian_vert.glsl")) { return false; }
+		if (!m_shaders->load_shader("lambertian_frag", uciniti::shader_type::FRAGMENT, "..//Shaders//lambertian_frag.glsl")) { return false; }
+		
 		// Load soulspear shader.
 		if (!m_shaders->load_shader("soulspear_vert", uciniti::shader_type::VERTEX, "..//Shaders//soulspear_vert.glsl")) { return false; }
-		if (!m_shaders->load_shader("soulspear_frag", uciniti::shader_type::FRAGMENT, "..//Shaders//soulspear_frag.glsl")) { return false; }
+		if (!m_shaders->load_shader("soulspear_frag", uciniti::shader_type::FRAGMENT, "..//Shaders//soulspear_frag.glsl")) { return false; }		
 
 		// Create programs.
+		if (!m_shaders->create_shader_program("lamp_program", { "lamp_vert", "lamp_frag" })) { return false; }
+		if (!m_shaders->create_shader_program("lambertian_program", { "lambertian_vert", "lambertian_frag" })) { return false; }
 		if (!m_shaders->create_shader_program("soulspear_program", { "soulspear_vert", "soulspear_frag" })) { return false; }
 
 		return true;
@@ -137,22 +225,31 @@ namespace uciniti
 
 	bool Render::create_lights()
 	{
-		m_main_light = new DirectionalLight(glm::vec3(1.0f, 0.0f, -1.0f),
-											glm::vec3(1.0f, 1.0f, 1.0f),
-											glm::vec3(0.61424f, 0.04136f, 0.04136f),
-											glm::vec3(0.727811f, 0.626959f, 0.626959f),
-											0.4f, 1.0f, 1.0f);
-		
+		// White, low intensity, "sun" directional light.
+		m_main_light = new DirectionalLight(glm::vec3(0.0f, 0.0f, -1.0f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			glm::vec3(1.0f, 1.0f, 1.0f),
+			0.05f, 0.1f, 0.4f);
 
-		//m_main_light = new DirectionalLight(glm::vec3(1.0f, 0.0f, -1.0f),
-		//	glm::vec3(1.0f, 1.0f, 1.0f),
-		//	glm::vec3(1.0f, 1.0f, 1.0f),
-		//	glm::vec3(1.0f, 1.0f, 1.0f),
-		//	1.0f, 1.0f, 1.0f);
+		// Red point light.
+		m_point_lights[0] = new PointLight(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.09f, 0.032f),
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f),
+			0.1f, 1.0f, 0.6f);
+		m_point_light_count++;
+
+		// Blue point light.
+		m_point_lights[1] = new PointLight(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.09f, 0.032f),
+			glm::vec3(0.0f, 0.0f, 1.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f),
+			glm::vec3(0.0f, 0.0f, 1.0f),
+			0.1f, 1.0f, 0.6f);
+		m_point_light_count++;
 
 		return true;
 	}
-
 
 	void Render::clear_screen()
 	{
@@ -183,6 +280,12 @@ namespace uciniti
 		{
 			delete mesh;
 			mesh = nullptr;
+		}
+
+		for (auto point_light : m_point_lights)
+		{
+			delete point_light;
+			point_light = nullptr;
 		}
 	}
 }

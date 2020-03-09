@@ -28,6 +28,7 @@ namespace uciniti
 		UNIFORM_1ui,
 
 		UNIFORM_3f,
+		UNIFORM_4f,
 
 		UNIFORM_MATRIX_2fv,
 		UNIFORM_MATRIX_3fv,

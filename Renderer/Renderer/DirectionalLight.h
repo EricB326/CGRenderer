@@ -9,7 +9,9 @@ namespace uciniti
 	{
 	public:
 		DirectionalLight();
-		DirectionalLight(glm::vec3 a_light_direction, glm::vec3 a_ambient_rgb, glm::vec3 a_diffuse_rgb, glm::vec3 a_specular_rgb, float a_ambient_intensity, float a_diffuse_intensity, float a_specular_intensity);
+		DirectionalLight(glm::vec3 a_light_direction, 
+			glm::vec3 a_ambient_rgb, glm::vec3 a_diffuse_rgb, glm::vec3 a_specular_rgb,
+			float a_ambient_intensity, float a_diffuse_intensity, float a_specular_intensity);
 
 		void set_light_direction(glm::vec3 a_new_light_xyz) { m_light_direction = a_new_light_xyz; }
 		void set_light_direction_x(float a_new_light_x) { m_light_direction.x = a_new_light_x; }
