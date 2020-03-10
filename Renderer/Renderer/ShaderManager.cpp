@@ -1,9 +1,11 @@
-#include "ShaderManager.h"
-
 /* Standard includes
 */
 #include <iostream>
 #include <sstream>
+
+/* User defined includes
+*/
+#include "ShaderManager.h"
 
 namespace uciniti
 {
@@ -81,55 +83,6 @@ namespace uciniti
 		m_program_list.at(a_program_key)->use_program();
 	}
 
-	void ShaderManager::reload_shader_program(const std::string& a_program_key, const std::vector<std::string> a_shader_list)
-	{
-		// If there is no program found that is been requested to reload, return.
-		if (!does_program_key_already_exist(a_program_key))
-		{
-			printf("ERROR: reload_shader_program() call. Failed to reload program '%s'.\n", a_program_key.c_str());
-			return;
-		}
-
-		printf("Current ID: %s -> %i\n", a_program_key.c_str(), m_program_list[a_program_key]->get_program_id());
-
-		// Create the 'reloaded' program that will be taking the current programs position.
-		ShaderProgram* reloaded_program = new ShaderProgram;
-		std::vector<uint> reloaded_shader_id_list;
-
-		// Loop through each identifier.
-		for (size_t i = 0; i < a_shader_list.size(); i++)
-		{
-			// Verify there is a shader at the identifier passed.
-			if (!does_shader_key_already_exist(a_shader_list[i]))
-			{
-				printf("ERROR: reload_shader_program() call. Cannot find shader key: '%s' to attach.\n", a_shader_list[i].c_str());
-				return;
-			}
-
-			m_shader_list[a_shader_list[i]]->reload_shader();
-
-			// Push into the uint vector the uint mapped with the identifier passed.
-			reloaded_shader_id_list.push_back(m_shader_list.at(a_shader_list[i])->get_shader_id());
-		}
-
-		// Verify there are shader ID's to pass.
-		if (reloaded_shader_id_list.size() <= 0)
-		{
-			printf("ERROR: create_shader_program() call. Could not find any shader ID's!\n");
-			return;
-		}
-
-		// Create the reloaded shader program.
-		reloaded_program->create_shader_program(reloaded_shader_id_list);
-
-		// Delete the current program in the map.
-		glDeleteProgram(m_program_list[a_program_key]->get_program_id());
-		delete_program_at_key(a_program_key);
-
-		// Replace the deleted program with the new reloaded program.
-		m_program_list[a_program_key] = reloaded_program;
-	}
-
 	bool ShaderManager::does_shader_key_already_exist(const std::string& a_key)
 	{
 		// Using the .find() search for the key passed through.
@@ -175,6 +128,7 @@ namespace uciniti
 
 	void ShaderManager::bind_uniform_vector_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const float* a_data_to_pass)
 	{
+		// Switches what type of data is being bound based on the uniform_type passed.
 		switch (a_type_to_bind)
 		{
 		case uciniti::uniform_type::UNIFORM_3f:
@@ -191,6 +145,7 @@ namespace uciniti
 
 	void ShaderManager::bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const int a_count, const float* a_data_to_pass, bool a_should_transpose)
 	{
+		// Switches what type of data is being bound based on the uniform_type passed.
 		switch (a_type_to_bind)
 		{
 		case uciniti::uniform_type::UNIFORM_MATRIX_2fv:

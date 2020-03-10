@@ -17,6 +17,10 @@
 
 namespace uciniti
 {
+	/* @brief Class ShaderProgram. Handles the creation, and use of
+		compiled shader programes. Stores a program ID for referring
+		to in other classes.
+	*/
 	class ShaderProgram
 	{
 	public:

@@ -17,11 +17,12 @@
 */
 #include "common.h"
 
-/* @brief Data for the different types of shaders that
-	can be created.
-*/
 namespace uciniti
 {
+
+	/* @brief Data for the different types of shaders that
+		can be created.
+	*/
 	enum class shader_type : uint
 	{
 		VERTEX,
@@ -31,6 +32,9 @@ namespace uciniti
 		FRAGMENT
 	};
 
+	/* @brief Shader class. Handles loading from files any given shader_type.
+		Stores the ID of the shader as well as the type of shader it is.
+	*/
 	class Shader
 	{
 	public:
@@ -54,8 +58,6 @@ namespace uciniti
 		   @param String of the filename/location to read data from.
 		*/
 		void load_from_file(const shader_type a_type_of_shader, const std::string& a_filepath);
-
-		void reload_shader();
 
 		/* @brief Retrives the shader id.
 		   @return Returns a unit of the shader id

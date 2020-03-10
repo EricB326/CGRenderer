@@ -34,7 +34,7 @@ namespace uciniti
 		*/
 		Application();
 
-		/* @brief See: application.h lines
+		/* @brief Calls shutdown() to delete all allocated pointers.
 		*/
 		virtual ~Application();
 
@@ -63,16 +63,49 @@ namespace uciniti
 		*/
 		bool has_window_closed();
 
+		/* @brief Retrives window width. 
+		*/
 		uint get_window_width() const;
+
+		/* @brief Retrives window width.
+		*/
 		uint get_window_height() const;
 
 	private:
+		/******************************************************/
+		// Variables
+		/* @brief Window context GLFW queries from Windowsm used to
+			display content.
+		*/
 		GLFWwindow* m_main_window;
+
+		/* @brief Main renderer, handles updating all data being rendered
+			to the window context.
+		*/
 		Render* m_renderer;
+
+		/* @brief Bool checking if the rendering loop is too conclude. True
+			if concluded.
+		*/
 		bool m_rendering_concluded;
 
+		/******************************************************/
+		// Functions
+		/* @brief Handles initializing all openGL and window related data.
+		   @param Title to display in the window context bar.
+		   @param The width of the window.
+		   @param The height of the window.
+		   @return False if the function failed to initialize.
+		*/
 		bool initialize(const char* a_window_title, int a_window_width, int a_window_height);
+
+		/* @brief Called once per frame. Handles updating all real-time info such as;
+			time, rendering, swapping buffers, etc.
+		*/
 		virtual void update();
+
+		/* @brief Handles deleting all pointers allocated.
+		*/
 		void shutdown();
 	};
 };

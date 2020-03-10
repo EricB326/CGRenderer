@@ -6,8 +6,13 @@
 namespace uciniti
 {
 	Render::Render()
-		: m_main_camera(nullptr), m_shaders(nullptr), m_main_light(nullptr), m_model_matrix(glm::mat4(1.0f))
-	{}
+		: m_main_camera(nullptr), m_shaders(nullptr), m_main_light(nullptr), m_point_light_count(0), m_model_matrix(glm::mat4(1.0f))
+	{
+		for (size_t i = 0; i < MAX_POINT_LIGHTS; i++)
+		{
+			m_point_lights[i] = nullptr;
+		}
+	}
 
 	Render::~Render()
 	{
@@ -16,6 +21,7 @@ namespace uciniti
 
 	void Render::start()
 	{
+		// Initialize the geometry.
 		if (!create_geometry())
 		{
 			printf("ERROR: create_geometry() call. Failed to create all geometry.\n");
@@ -25,6 +31,7 @@ namespace uciniti
 
 		//create_textures();
 
+		// Initialize the shaders.
 		if (!create_shaders())
 		{
 			printf("ERROR: create_shaders() call. Failed to create all shaders.\n");
@@ -32,6 +39,7 @@ namespace uciniti
 			return;
 		}
 
+		// Initialize the lights.
 		if (!create_lights())
 		{
 			printf("ERROR: create_lights() call. Failed to create all lights.\n");
@@ -39,6 +47,7 @@ namespace uciniti
 			return;
 		}
 
+		// Initialize the camera.
 		m_main_camera = new FreeCamera();
 		m_main_camera->set_perspective(glm::radians(75.0f), (float)WIDTH / (float)HEIGHT, 0.01f, 100.0f);
 		m_main_camera->set_look_at(glm::vec3(0.0f, 1.0f, 3.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -61,26 +70,25 @@ namespace uciniti
 		set_red_lamp(m_model_matrix, Time::get_total_time(), glm::vec3(0.0f, 0.0f, 0.0f));
 		set_blue_lamp(m_model_matrix, Time::get_total_time(), glm::vec3(0.0f, 0.0f, 0.0f));
 
-		// Set soulspear data and render.
-		set_soulspear(m_model_matrix, Time::get_total_time());
+		// Set obj models data and render.
+		set_earth(m_model_matrix, Time::get_total_time());
+		set_asteroid(m_model_matrix, Time::get_total_time());
 	}
 
 	void Render::set_lights(glm::mat4 a_model_matrix, double a_current_time)
 	{
 		// Direction light section.
 		// Colours.
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_ambient_colour()));
 		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_diffuse_colour()));
 		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_specular_colour()));
 
 		// Intensities.
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.ambient_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_ambient_intensity(), 0);
 		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.diffuse_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_diffuse_intensity(), 0);
 		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.base.specular_intensity", uciniti::uniform_type::UNIFORM_1f, m_main_light->get_specular_intensity(), 0);
 
 		// Direction.
 		//m_main_light->set_light_direction(glm::vec3(glm::cos(a_current_time), 0.0f, glm::sin(a_current_time)));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.direction", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_light_direction()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_directional_light.direction", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_main_light->get_direction()));
 
 		// Point lights section.
 		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "point_light_count", uciniti::uniform_type::UNIFORM_1i, 0, m_point_light_count);
@@ -89,56 +97,23 @@ namespace uciniti
 			std::string light_index = "point_lights[" + std::to_string(i) + "].";
 
 			// Colours.
-			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.ambient_colour").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_ambient_colour()));
 			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.diffuse_colour").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_diffuse_colour()));
 			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.specular_colour").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_specular_colour()));
 
 			// Intensities.
-			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.ambient_intensity").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_ambient_intensity(), 0);
 			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.diffuse_intensity").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_diffuse_intensity(), 0);
 			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "base.specular_intensity").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_specular_intensity(), 0);
 
 			// Position.
-			m_point_lights[0]->set_light_position(glm::vec3(glm::cos(a_current_time) * 2.0f , 0.0f, (glm::sin(a_current_time) * 2.0f - 3.0f)));
-			m_point_lights[1]->set_light_position(glm::vec3(glm::sin(a_current_time * 3.0f), (glm::cos(a_current_time * 3.0f) * 2.0f), (glm::sin(a_current_time * 3.0f) - 3.0f)));
-			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "position").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_light_position()));
+			m_point_lights[0]->set_position(glm::vec3(glm::cos(a_current_time) * 2.0f , 0.0f, (glm::sin(a_current_time) * 2.0f - 2.0f)));
+			m_point_lights[1]->set_position(glm::vec3(glm::sin(a_current_time * 3.0f), (glm::cos(a_current_time * 3.0f) * 2.0f), (glm::sin(a_current_time * 3.0f) - 2.0f)));
+			m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), (light_index + "position").c_str(), uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(m_point_lights[i]->get_position()));
 
 			// Attenuation.
-			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "constant").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_light_constant(), 0);
-			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "linear").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_light_linear(), 0);
-			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "exponent").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_light_exponent(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "constant").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_constant(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "linear").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_linear(), 0);
+			m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), (light_index + "exponent").c_str(), uciniti::uniform_type::UNIFORM_1f, m_point_lights[i]->get_exponent(), 0);
 		}
-	}
-
-	void Render::set_soulspear(glm::mat4 a_model_matrix, double a_current_time)
-	{
-		// User created shader program.
-		m_shaders->use_program("lambertian_program");
-
-		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
-
-		a_model_matrix = glm::mat4(1.0f);
-		a_model_matrix = glm::translate(a_model_matrix, glm::vec3(0.0f, 0.0f, -3.0f));
-		a_model_matrix = glm::rotate(a_model_matrix, glm::radians((float)a_current_time * 30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		a_model_matrix = glm::scale(a_model_matrix, glm::vec3(0.003f, 0.003f, 0.003f));
-
-		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
-
-		glm::mat3 normal_matrix = glm::inverseTranspose(a_model_matrix);
-		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "normal_matrix", uciniti::uniform_type::UNIFORM_MATRIX_3fv, 1, glm::value_ptr(normal_matrix), false);
-
-
-		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.bump_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("earth_material", uciniti::material_map_type::BUMP_MAP)->get_handle() - 5);
-		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.albedo_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("earth_material", uciniti::material_map_type::DIFFUSE_MAP)->get_handle() - 5);
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("earth_material")->get_ambient()));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("earth_material")->get_diffuse()));
-		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("earth_material")->get_specular()));
-		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_shininess", uciniti::uniform_type::UNIFORM_1f, uciniti::MaterialManager::get_material("earth_material")->get_specular_shininess(), 0);
-
-		TextureManager::use_texture("earth_material_bump_map", 0);
-		TextureManager::use_texture("earth_material_diffuse_map", 1);
-		m_mesh_list[3]->render_mesh();
 	}
 
 	void Render::set_red_lamp(glm::mat4 a_model_matrix, double a_current_time, glm::vec3 a_position)
@@ -146,16 +121,18 @@ namespace uciniti
 		// User created shader program.
 		m_shaders->use_program("lamp_program");
 
+		// Pass the data projection view matrix, time, and lamp colour to the GPU.
 		m_shaders->bind_uniform_data(m_shaders->get_program_id("lamp_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
 		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);		
 		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lamp_program"), "lamp_colour", uciniti::uniform_type::UNIFORM_4f, glm::value_ptr(glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 
+		// Modify and pass model matrix to the GPU.
 		a_model_matrix = glm::mat4(1.0f);
-		a_model_matrix = glm::translate(a_model_matrix, m_point_lights[0]->get_light_position());
+		a_model_matrix = glm::translate(a_model_matrix, m_point_lights[0]->get_position());
 		a_model_matrix = glm::scale(a_model_matrix, glm::vec3(0.01f, 0.01f, 0.01f));
-
 		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
 
+		// Render the correct mesh in the mesh list.
 		m_mesh_list[0]->render_mesh();
 	}
 
@@ -164,17 +141,82 @@ namespace uciniti
 		// User created shader program.
 		m_shaders->use_program("lamp_program");
 
+		// Pass the data projection view matrix, time, and lamp colour to the GPU.
 		m_shaders->bind_uniform_data(m_shaders->get_program_id("lamp_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
 		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
 		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lamp_program"), "lamp_colour", uciniti::uniform_type::UNIFORM_4f, glm::value_ptr(glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)));
 
+		// Modify and pass model matrix to the GPU.
 		a_model_matrix = glm::mat4(1.0f);
-		a_model_matrix = glm::translate(a_model_matrix, m_point_lights[1]->get_light_position());
+		a_model_matrix = glm::translate(a_model_matrix, m_point_lights[1]->get_position());
 		a_model_matrix = glm::scale(a_model_matrix, glm::vec3(0.01f, 0.01f, 0.01f));
-
 		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lamp_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
 
+		// Render the correct mesh in the mesh list.
 		m_mesh_list[1]->render_mesh();
+	}
+
+	void Render::set_earth(glm::mat4 a_model_matrix, double a_current_time)
+	{
+		// User created shader program.
+		m_shaders->use_program("lambertian_program");
+
+		// Pass the data projection view matrix as well as time to the GPU.
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
+
+		// Modify and pass model matrix to the GPU.
+		a_model_matrix = glm::mat4(1.0f);
+		a_model_matrix = glm::translate(a_model_matrix, glm::vec3(0.0f, 0.0f, -2.0f));
+		a_model_matrix = glm::rotate(a_model_matrix, glm::radians((float)a_current_time * 30.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		a_model_matrix = glm::scale(a_model_matrix, glm::vec3(0.003f, 0.003f, 0.003f));
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
+
+		// Pass the material data to the GPU.
+		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.bump_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("earth_material", uciniti::material_map_type::BUMP_MAP)->get_handle() - 5);
+		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.albedo_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("earth_material", uciniti::material_map_type::DIFFUSE_MAP)->get_handle() - 5);
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("earth_material")->get_ambient()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("earth_material")->get_diffuse()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("earth_material")->get_specular()));
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_shininess", uciniti::uniform_type::UNIFORM_1f, uciniti::MaterialManager::get_material("earth_material")->get_specular_shininess(), 0);
+
+		// Use the loaded textures.
+		TextureManager::use_texture("earth_material_bump_map", 0);
+		TextureManager::use_texture("earth_material_diffuse_map", 1);
+
+		// Render the correct mesh in the mesh list.
+		m_mesh_list[3]->render_mesh();
+	}
+
+	void Render::set_asteroid(glm::mat4 a_model_matrix, double a_current_time)
+	{
+		// User created shader program.
+		m_shaders->use_program("lambertian_program");
+
+		// Pass the data projection view matrix as well as time to the GPU.
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "projection_view_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(m_main_camera->get_projection_view()), false);
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "time", uciniti::uniform_type::UNIFORM_1f, a_current_time, 0);
+
+		// Modify and pass model matrix to the GPU.
+		a_model_matrix = glm::mat4(1.0f);
+		a_model_matrix = glm::translate(a_model_matrix, glm::vec3(glm::cos(a_current_time) * 1.3f, glm::sin(a_current_time), glm::sin(a_current_time) - 2.0f));
+		a_model_matrix = glm::rotate(a_model_matrix, glm::radians((float)a_current_time * 120.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		m_shaders->bind_uniform_matrix_data(m_shaders->get_program_id("lambertian_program"), "model_matrix", uciniti::uniform_type::UNIFORM_MATRIX_4fv, 1, glm::value_ptr(a_model_matrix), false);
+
+		// Pass the material data to the GPU.
+		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.bump_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("asteroid_material", uciniti::material_map_type::BUMP_MAP)->get_handle() - 8);
+		m_shaders->bind_uniform_data<uint>(m_shaders->get_program_id("lambertian_program"), "uniform_material.albedo_map", uciniti::uniform_type::UNIFORM_1i, 0.0f, uciniti::MaterialManager::get_material_map("asteroid_material", uciniti::material_map_type::DIFFUSE_MAP)->get_handle() - 8);
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.ambient_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("asteroid_material")->get_ambient()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.diffuse_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("asteroid_material")->get_diffuse()));
+		m_shaders->bind_uniform_vector_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_colour", uciniti::uniform_type::UNIFORM_3f, glm::value_ptr(uciniti::MaterialManager::get_material("asteroid_material")->get_specular()));
+		m_shaders->bind_uniform_data(m_shaders->get_program_id("lambertian_program"), "uniform_material.specular_shininess", uciniti::uniform_type::UNIFORM_1f, uciniti::MaterialManager::get_material("asteroid_material")->get_specular_shininess(), 0);
+
+		// Use the loaded textures.
+		TextureManager::use_texture("asteroid_material_bump_map", 0);
+		TextureManager::use_texture("asteroid_material_diffuse_map", 1);
+
+		// Render the correct mesh in the mesh list.
+		m_mesh_list[4]->render_mesh();
 	}
 
 	bool Render::create_geometry()
@@ -183,18 +225,19 @@ namespace uciniti
 		Mesh* blue_lamp = new Mesh();
 		Mesh* soulspear = new Mesh();
 		Mesh* earth = new Mesh();
+		Mesh* asteroid = new Mesh();
 
 		if (!red_lamp->load_obj("..//Models//Free3D//Crate//crate.obj", "red_lamp_material")) { return false; }
 		if (!blue_lamp->load_obj("..//Models//Free3D//Crate//crate.obj", "blue_lamp_material")) { return false; }
 		if (!soulspear->load_obj("..//Models//Soulspear//soulspear.obj", "soulspear_material", true, true)) { return false; }
 		if (!earth->load_obj("..//Models//Free3D//Earth//earth.obj", "earth_material", true, true)) { return false; }
-		
-
+		if (!asteroid->load_obj("..//Models//cc0//Rock//rock.obj", "asteroid_material", true, true)) { return false; }
+	
 		m_mesh_list.push_back(red_lamp);
 		m_mesh_list.push_back(blue_lamp);
 		m_mesh_list.push_back(soulspear);
 		m_mesh_list.push_back(earth);
-
+		m_mesh_list.push_back(asteroid);
 
 		return true;
 	}
@@ -232,25 +275,22 @@ namespace uciniti
 	{
 		// White, low intensity, "sun" directional light.
 		m_main_light = new DirectionalLight(glm::vec3(0.0f, 0.0f, -1.0f),
-			glm::vec3(.1f, .1f, .1f),
 			glm::vec3(1.0f, 1.0f, 1.0f),
 			glm::vec3(1.0f, 1.0f, 1.0f),
-			0.1f, 0.3f, 0.4f);
+			0.3f, 0.05f);
 
 		// Red point light.
 		m_point_lights[0] = new PointLight(glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(1.0f, 0.09f, 0.032f),
 			glm::vec3(1.0f, 0.0f, 0.0f),
 			glm::vec3(1.0f, 0.0f, 0.0f),
-			glm::vec3(1.0f, 0.0f, 0.0f),
-			1.0f, 1.0f, 0.6f);
+			1.0f, 0.05f);
 		m_point_light_count++;
 
 		// Blue point light.
 		m_point_lights[1] = new PointLight(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.09f, 0.032f),
 			glm::vec3(0.0f, 0.0f, 1.0f),
 			glm::vec3(0.0f, 0.0f, 1.0f),
-			glm::vec3(0.0f, 0.0f, 1.0f),
-			0.1f, 1.0f, 0.6f);
+			1.0f, 0.05f);
 		m_point_light_count++;
 
 		return true;

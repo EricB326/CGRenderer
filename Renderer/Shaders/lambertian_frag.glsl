@@ -5,11 +5,9 @@
 
 struct light
 {
-	vec3 ambient_colour;
 	vec3 diffuse_colour;
 	vec3 specular_colour;
 	
-	float ambient_intensity;
 	float diffuse_intensity;
 	float specular_intensity;
 };
@@ -97,9 +95,6 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 {
 	// Retrieve the bump map to use in calculating lighting.
 	vec3 final_bump_map = texture(uniform_material.bump_map, final_texture_coords).rgb;
-		
-	// Calculate the ambient.
-	//vec3 ambient_colour = (a_light.ambient_colour + uniform_material.ambient_colour) * a_light.ambient_intensity;
 	
 	// Normalize direction and average normals.
 	vec3 normals = final_tangent_space * (final_bump_map * 2.0 - 1.0);
@@ -130,8 +125,6 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 							   * a_light.specular_intensity); 							  // Intensity of the specular colour.
 	}
 						  
-	
-	//return (ambient_colour + diffuse_colour + specular_colour);
 	return (diffuse_colour + specular_colour);
 }
 

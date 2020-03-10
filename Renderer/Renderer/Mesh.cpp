@@ -1,14 +1,18 @@
-#include "Mesh.h"
-
 /* .OBJ importing includes
 */
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "..\Dependencies\tiny_obj\tiny_obj_loader.h"
 
+/* Standard lib includes
+*/
 #include <chrono>
+#include <vector>
+
+/* User defined includes
+*/
+#include "Mesh.h"
 #include "MaterialManager.h"
 #include "TextureManager.h"
-#include <vector>
 
 
 namespace uciniti
@@ -20,7 +24,7 @@ namespace uciniti
 		to the header file as the functions the library uses are only usable when the
 		implementation is within the same file.
 	*/
-	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip, const char* a_material_name);
+	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip, const char* a_material_name, std::string a_folder_path);
 
 	Mesh::Mesh()
 		: m_empty_mesh(true), m_is_geometry_user_defined(false), m_VAO(0), m_VBO(0), m_EBO(0), m_index_count(0)
@@ -29,6 +33,7 @@ namespace uciniti
 	Mesh::Mesh(const char* a_filepath, const char* a_material_name, bool a_load_textures, bool a_flip_textures)
 		: m_empty_mesh(true), m_is_geometry_user_defined(false), m_VAO(0), m_VBO(0), m_EBO(0), m_index_count(0)
 	{
+		// Call the load_obj() function to handle reading the data from the filepath provided.
 		load_obj(a_filepath, a_material_name, a_load_textures, a_flip_textures);
 	}
 
@@ -131,7 +136,7 @@ namespace uciniti
 	{
 		// If the geometry is user defined, don't bother checking
 		// for sub meshes as it is not possible. Only for loaded
-		// meshes via files.
+		// meshes via files can contain sub meshes.
 		if (m_is_geometry_user_defined)
 		{
 			// Error checking for none existant IDs
@@ -212,16 +217,19 @@ namespace uciniti
 		{
 			clear_mesh();
 		}
+
 		// Store the seperate objects and their faces.
 		std::vector<tinyobj::shape_t> shapes;
+
 		// Materials and textures per face.
 		std::vector<tinyobj::material_t> materials;
+
 		// Contain errors that occur while loading files.
 		std::string err;
 
 		std::string file = a_filepath;
 		std::string folder = file.substr(0, file.find_last_of('/') + 1);
-		
+
 		// Check current time point.
 		if (!tinyobj::LoadObj(shapes, materials, err, a_filepath, folder.c_str()))
 		{
@@ -250,9 +258,10 @@ namespace uciniti
 
 		MaterialManager::create_material(a_material_name, loaded_mesh_materials, loaded_specular_shininess, loaded_alpha);
 
+		// Create and texture maps that were loaded from the .mtl file.
 		for (const auto& material : materials)
 		{
-			create_texture_maps(material, a_should_textures_flip, a_material_name);
+			create_texture_maps(material, a_should_textures_flip, a_material_name, folder);
 		}
 
 		// Pass data to the correct struct class.
@@ -283,9 +292,6 @@ namespace uciniti
 				// If there is mesh normals data, populate the normal.
 				if (!shape.mesh.normals.empty())
 					m_standard_vert[i].m_normal = glm::vec4(shape.mesh.normals[i * 3], shape.mesh.normals[i * 3 + 1], shape.mesh.normals[i * 3 + 2], 0.0f);
-
-				//printf("Index: %i - norm0: %f | norm1: %f | norm2: %f", i, shape.mesh.normals[i * 3], shape.mesh.normals[i * 3 + 1], shape.mesh.normals[i * 3 + 2]);
-				//printf("\n");
 			}
 
 			// Calculate tangents for normal mapping.
@@ -298,7 +304,6 @@ namespace uciniti
 
 			sub_meshes.push_back(sub_mesh);
 		}
-
 
 		return true;
 	}
@@ -547,119 +552,13 @@ namespace uciniti
 		glBindVertexArray(0);
 	}
 
-	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip, const char* a_material_name)
-	{
-		if (a_material.alpha_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.alpha_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.alpha_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_alpha_map";
-
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::ALPHA_MAP);
-		}
-
-		if (a_material.ambient_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.ambient_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.ambient_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_ambient_map";
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::AMBIENT_MAP);
-		}
-
-		if (a_material.bump_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.bump_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.bump_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_bump_map";
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::BUMP_MAP);
-		}
-
-		if (a_material.diffuse_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.diffuse_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.diffuse_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_diffuse_map";
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::DIFFUSE_MAP);
-		}
-
-		if (a_material.displacement_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.displacement_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.displacement_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_displacement_map";
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::DISPLACEMENT_MAP);
-		}
-
-		if (a_material.specular_highlight_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.specular_highlight_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.specular_highlight_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_spec_highlight_map";
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::SPECULAR_HIGHLIGHT_MAP);
-		}
-
-		if (a_material.specular_texname != "\0")
-		{
-			// If the model creator passed in their entire system as the 
-			// texture file path, handle removing all the junk data.
-			int location = std::string(a_material.specular_texname).rfind("\\");
-			std::string new_file_name = std::string(a_material.specular_texname).substr(location + 1);
-			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			std::string identifier_name = a_material_name;
-			identifier_name = identifier_name + "_specular_map";
-
-			// Pass the texture file data.
-			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::SPECULAR_MAP);
-		}
-	}
-
 	void Mesh::clear_mesh()
 	{
+		// Check if the data passed is user defined or from a .obj file.
 		if (m_is_geometry_user_defined)
 		{
+			// If it is user defined, only one mesh is possibly created to be
+			// removed.
 			// Clear all the buffers off the graphics card and reset the IDs
 			if (m_VAO)
 			{
@@ -684,6 +583,8 @@ namespace uciniti
 		}
 		else
 		{
+			// If it is not user defined, be sure to go through each possible sub
+			// mesh as well.
 			for (auto& sub_mesh : sub_meshes)
 			{
 				// Clear all the buffers off the graphics card and reset the IDs
@@ -708,6 +609,145 @@ namespace uciniti
 				// Reset the index count
 				sub_mesh.m_index_count = 0;
 			}
+		}
+	}
+
+	void create_texture_maps(tinyobj::material_t a_material, bool a_should_textures_flip, const char* a_material_name, std::string a_folder_path)
+	{
+		// Remove the "..//Models" from the folder path.
+		a_folder_path.erase(0, 10);
+
+		if (a_material.alpha_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.alpha_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.alpha_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_alpha_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::ALPHA_MAP);
+		}
+
+		if (a_material.ambient_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.ambient_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.ambient_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_ambient_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::AMBIENT_MAP);
+		}
+
+		if (a_material.bump_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.bump_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.bump_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_bump_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::BUMP_MAP);
+		}
+
+		if (a_material.diffuse_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.diffuse_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.diffuse_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_diffuse_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::DIFFUSE_MAP);
+		}
+
+		if (a_material.displacement_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.displacement_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.displacement_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_displacement_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::DISPLACEMENT_MAP);
+		}
+
+		if (a_material.specular_highlight_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.specular_highlight_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.specular_highlight_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_spec_highlight_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::SPECULAR_HIGHLIGHT_MAP);
+		}
+
+		if (a_material.specular_texname != "\0")
+		{
+			// If the model creator passed in their entire system as the 
+			// texture file path, handle removing all the junk data.
+			int location = std::string(a_material.specular_texname).rfind("\\");
+			std::string new_file_name = std::string(a_material.specular_texname).substr(location + 1);
+
+			// Set the file location to the Textures folder path, as well as the name of the texture itself.
+			std::string texture_file_location = "..//Textures" + a_folder_path + new_file_name;
+
+			// Create an identifier to easily find loaded maps.
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_specular_map";
+
+			// Pass the texture file data.
+			TextureManager::create_texture(identifier_name.c_str(), texture_file_location.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::SPECULAR_MAP);
 		}
 	}
 }

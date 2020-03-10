@@ -1,15 +1,20 @@
-#include "Texture.h"
+/* Graphic includes
+*/
 #include "gl_core_4_5.h"
 
-/* External lib includes
+/* Texture loading lib includes
 */
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+/* User defined includes
+*/
+#include "Texture.h"
+
 namespace uciniti
 {
 	Texture::Texture()
-		: m_texture_handle(0), m_width(0), m_height(0), m_bit_depth(0), m_texture_sampler_id(0)
+		: m_texture_handle(0), m_width(0), m_height(0), m_bit_depth(0)
 	{}
 
 	bool Texture::load_texture(const char* a_filepath)
@@ -59,11 +64,6 @@ namespace uciniti
 	uint Texture::get_handle()
 	{
 		return m_texture_handle;
-	}
-
-	uint Texture::get_sampler_id()
-	{
-		return m_texture_sampler_id;
 	}
 
 	void Texture::clear_texture()

@@ -1,6 +1,10 @@
-#include "Time.h"
-
+/* Graphic includes
+*/
 #include "glfw3.h"
+
+/* User defined includes
+*/
+#include "Time.h"
 
 namespace uciniti
 {

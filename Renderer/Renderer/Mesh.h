@@ -5,6 +5,7 @@
 */
 #include <iostream>
 #include <vector>
+
 /* Graphic includes
 */
 #include "gl_core_4_5.h"
@@ -87,6 +88,8 @@ struct full_vertex
 	glm::vec2 m_tex_coords003;
 };
 
+/* @brief Enum class of the different types of vertex structs
+	can be created. Data is stored as unsigned ints.*/
 enum class vertex_type : uint
 {
 	BASE_VERTEX,
@@ -94,6 +97,9 @@ enum class vertex_type : uint
 	FULL_VERTEX
 };
 
+/* @brief Struct which is used as a holder for crucial rendering
+	data for any sub meshes that may be loaded with a .obj file.
+*/
 struct sub_mesh_data
 {
 	/* @brief Data required for rendering.
@@ -111,11 +117,11 @@ struct sub_mesh_data
 	GLsizei m_index_count, m_vert_count;
 };
 
-/* @brief Handles the creation and rendering of vertices in
-   the renderer. 
-*/
 namespace uciniti
 {
+	/* @brief Handles the creation and rendering of vertices in
+		the engine.
+	*/
 	class Mesh
 	{
 	public:
@@ -125,7 +131,15 @@ namespace uciniti
 		*/
 		Mesh();
 
-		/* TODO: Comment. */
+		/* @brief Constructs the mesh to be rendered via a loaded .obj file.
+			Passes the filepath over to a load function to handle reading the
+			data. Also handles setting up materials, textures, and if the textures
+			should be flipped.
+		   @param Const char* filepath of the .obj file being loaded.
+		   @param Const char* user made name to use as a material identifier.
+		   @param Bool on if the load_obj() function called should load textures as well.
+		   @param Bool on if the loaded textures should be flipped.
+		*/
 		Mesh(const char* a_filepath, const char* a_material_name, bool a_load_textures = true, bool a_flip_textures = false);
 
 		/* @brief Constructor zeros all values with no params.
@@ -138,7 +152,9 @@ namespace uciniti
 		*/
 		Mesh(GLfloat* a_vertices, uint* a_indices, uint a_num_of_verts, uint a_num_of_indices, vertex_type a_vertex_type);
 
-		/* TODO: Comment. */
+		/* @brief Clears all the data stored within the class. Such as; array objects, buffer objetcs,
+			etc.
+		*/
 		~Mesh() { clear_mesh(); }
 
 		/* @brief Renders the prepared mesh data
@@ -181,6 +197,9 @@ namespace uciniti
 		*/
 		std::vector<full_vertex> m_full_vert;
 
+		/* @brief Holds multiple (if required) sub meshes with their own respective
+			data crucial for rendering. IE, VAO, VBO, EBO, indicies, etc.
+		*/
 		std::vector<sub_mesh_data> sub_meshes;
 
 		/* @brief Checks to see if the mesh is currently occupied
@@ -200,7 +219,10 @@ namespace uciniti
 
 		/******************************************************/
 		// Functions
-		/* TODO: Comment. */
+		/* @brief Handles calculating the tangents of each vertex in the
+			mesh. Also orthonormalizes each tangent and calculates the
+			handedness.
+		*/
 		void calculate_vertex_tangents(std::vector<standard_vertex>& a_vertices, const uint* a_indices, const GLsizei a_index_count);
 
 		/* @brief Initializes all the base vertex array/buffer objects

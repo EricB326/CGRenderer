@@ -1,3 +1,5 @@
+/* User defined includes
+*/
 #include "PointLight.h"
 
 namespace uciniti
@@ -7,8 +9,8 @@ namespace uciniti
 		  BaseLight()
 	{}
 
-	PointLight::PointLight(glm::vec3 a_light_position, glm::vec3 a_attenuation_values, glm::vec3 a_ambient_rgb, glm::vec3 a_diffuse_rgb, glm::vec3 a_specular_rgb, float a_ambient_intensity, float a_diffuse_intensity, float a_specular_intensity)
+	PointLight::PointLight(glm::vec3 a_light_position, glm::vec3 a_attenuation_values, glm::vec3 a_diffuse_rgb, glm::vec3 a_specular_rgb, float a_diffuse_intensity, float a_specular_intensity)
 		: m_position(a_light_position), m_constant(a_attenuation_values.x), m_linear(a_attenuation_values.y), m_exponent(a_attenuation_values.z),
-		BaseLight(a_ambient_rgb, a_diffuse_rgb, a_specular_rgb, a_ambient_intensity, a_diffuse_intensity, a_specular_intensity)
+		BaseLight(a_diffuse_rgb, a_specular_rgb, a_diffuse_intensity, a_specular_intensity)
 	{}
 }

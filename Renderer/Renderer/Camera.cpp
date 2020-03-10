@@ -1,3 +1,5 @@
+/* User defined includes
+*/
 #include "Camera.h"
 
 namespace uciniti
@@ -12,8 +14,10 @@ namespace uciniti
 	{
 		// Set the view transforms new look at.
 		m_view_transform = glm::lookAt(a_world_space, a_look_direction, a_up);
+
 		// Set the cameras world matrix to the inverse of the view matrix.
 		m_world_transform = glm::inverse(m_view_transform);
+
 		// Update the projectiong * view matrix.
 		update_matrices();
 	}
@@ -22,8 +26,10 @@ namespace uciniti
 	{
 		// Sets the transform coloum of the world matrix to the passed position.
 		m_world_transform[3] = glm::vec4(a_position, 1.0f);
+
 		// Set the view matrix to the inverse of the world matrix.
 		m_view_transform = glm::inverse(m_world_transform);
+
 		// Update the projectiong * view matrix.
 		update_matrices();
 	}

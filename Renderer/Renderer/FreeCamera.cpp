@@ -1,3 +1,5 @@
+/* User defined includes
+*/
 #include "FreeCamera.h"
 
 namespace uciniti
@@ -20,6 +22,7 @@ namespace uciniti
 
 		// Check keyboard controls.
 		keyboard_controls(glfw_window, a_delta_time);
+
 		// Check mouse controls.
 		mouse_controls(glfw_window, a_delta_time);
 	}
@@ -28,10 +31,10 @@ namespace uciniti
 	{
 		// Only update camera if input is received.
 		bool input_flag = false;
+
 		// The build translation vector.
 		glm::vec3 displacement = glm::vec3(0.0f);
 
-		/*** KEYBOARD CONTROL ***/
 		// Forward.
 		if (glfwGetKey(a_window, GLFW_KEY_W))
 		{
@@ -79,7 +82,7 @@ namespace uciniti
 
 	void FreeCamera::mouse_controls(GLFWwindow* a_window, double a_delta_time)
 	{
-		/*** MOUSE CONTROL ***/
+		// Store the cursors position on screen.
 		double cursor_position_x;
 		double cursor_position_y;
 
@@ -106,15 +109,19 @@ namespace uciniti
 		{
 			// Identity matrix to accumulate rotation.
 			auto rotation = glm::mat4(1.0f);
+
 			// Left / Right rotation.
 			rotation = glm::rotate(rotation, float(m_mouse_sensitivity * a_delta_time * -delta_x), glm::vec3(get_view_up()));
+
 			// Up / Down rotation.
 			rotation = glm::rotate(rotation, float(m_mouse_sensitivity * a_delta_time * -delta_y), glm::vec3(1.0f, 0.0f, 0.0f));
 
 			// Apply the rotation to the camera.
 			m_world_transform = m_world_transform * rotation;
+
 			// Preserve the inverse.
 			m_view_transform = glm::inverse(m_world_transform);
+
 			// Update PxV.
 			update_matrices();
 		}

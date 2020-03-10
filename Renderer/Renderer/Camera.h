@@ -17,6 +17,11 @@
 
 namespace uciniti
 {
+	/* @brief Class Camera. Base data for different camera types
+		that may be made. Handles setting if the camera is perspective
+		or ortho, where the camera is looking, as well as any world, view,
+		and projection matrix data.
+	*/
 	class Camera
 	{
 	public:

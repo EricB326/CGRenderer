@@ -7,6 +7,12 @@
 
 namespace uciniti
 {
+	/* @detail Class FreeCamera. Derives from the Camera class.
+		Handles creating a camera that can more and look in all
+		directions. Allows for changing the mouse sensitivity and
+		speed of the camera. Finally, handles checking for user
+		input to modify the facing and position of the camera.
+	*/
 	class FreeCamera : public Camera
 	{
 	public:

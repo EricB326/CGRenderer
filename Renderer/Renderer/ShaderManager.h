@@ -20,6 +20,9 @@
 
 namespace uciniti 
 {
+	/* @brief Enum class of the different uniforms that can
+		be used to pass data to the GPU.
+	*/
 	enum class uniform_type : uint
 	{
 		UNIFORM_1f,
@@ -35,6 +38,11 @@ namespace uciniti
 		UNIFORM_MATRIX_4fv,
 	};
 
+	/* @brief ShaderManager class. Handles calling diffent functions
+		within the Shader and ShaderProgram classes to create finished
+		programs, ready for use. Also allows the user to bind uniform
+		data of different types easily.
+	*/
 	class ShaderManager
 	{
 	public:
@@ -69,9 +77,6 @@ namespace uciniti
 		*/
 		void use_program(const std::string& a_program_key);
 
-		/* TODO: Comment. */
-		void reload_shader_program(const std::string& a_program_key, const std::vector<std::string> a_shader_list);
-
 		/* @brief Retrives the program ID.
 		   @param Key of the shader program the user would like to key of.
 		   @return Returns a uint with the ID.
@@ -82,6 +87,7 @@ namespace uciniti
 			and it will be correctly passed to the openGl uniform call.
 		   @param ID of the program being used.
 		   @param Location (name) of the uniform in the shader.
+		   @param Type of uniform data being passed.
 		   @param Floating point data to be passed.
 		   @param Template data to be passed. Only for non-floating point values.
 		*/
@@ -108,8 +114,26 @@ namespace uciniti
 			}
 		}
 
+		/* @brief Allows the user to bind vector based data to the GPU using any 
+			uniform_type. Required the one call and it will use the correct OpenGL
+			calls.
+		   @param ID of the program being used.
+		   @param Location (name) of the uniform in the shader.
+		   @param Type of uniform data being passed.
+		   @param Floating* of the data to be passed.
+		*/
 		void bind_uniform_vector_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const float* a_data_to_pass);
 
+		/* @brief Allows the user to bind matrix based data to the GPU using any
+			uniform_type. Required the one call and it will use the correct OpenGL
+			calls.
+		   @param ID of the program being used.
+		   @param Location (name) of the uniform in the shader.
+		   @param Type of uniform data being passed.
+		   @param Number of data to read.
+		   @param Floating* of the data to be passed.
+		   @param Should the matrix be transposed.
+		*/
 		void bind_uniform_matrix_data(const uint a_program_id, const char* a_uniform_location, const uniform_type a_type_to_bind, const int a_count, const float* a_data_to_pass, bool a_should_transpose);
 
 	private:
@@ -141,6 +165,8 @@ namespace uciniti
 		*/
 		bool does_program_key_already_exist(const std::string& a_key);
 
+		/* @brief Deletes the program at the specified map key identified.
+		*/
 		void delete_program_at_key(const std::string& a_program_key);
 
 		/* @brief Cleans the shader manager.

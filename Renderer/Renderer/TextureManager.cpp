@@ -1,8 +1,10 @@
-#include "TextureManager.h"
-
 /* Graphic includes
 */
 #include "gl_core_4_5.h"
+
+/* User defined includes
+*/
+#include "TextureManager.h"
 
 namespace uciniti
 {

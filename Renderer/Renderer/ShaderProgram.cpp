@@ -1,3 +1,5 @@
+/* User defined includes
+*/
 #include "ShaderProgram.h"
 #include "Shader.h"
 
@@ -42,6 +44,7 @@ namespace uciniti
 		GLint success = GL_FALSE;
 		glGetProgramiv(m_program_id, GL_LINK_STATUS, &success);
 
+		// if the linking was not successful, log the error.
 		if (!success)
 		{
 			// Get the length of the error.

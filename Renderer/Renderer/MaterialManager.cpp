@@ -10,12 +10,14 @@ namespace uciniti
 
 	bool MaterialManager::create_material(const char* a_key_name, std::vector<glm::vec3>& a_material_list, const float a_spec_shininess, const float a_alpha)
 	{
+		// Check that the key identifier doesnt already exist.
 		if (does_key_exist(a_key_name))
 		{
 			printf("ERROR: create_material() call. Material key name '%s' already exists.\n", a_key_name);
 			return false;
 		}
 
+		// Create the new material to be mapped
 		Material* new_material = new Material();
 		new_material->set_mat_attributes(a_material_list[0], a_material_list[1], a_material_list[2], a_material_list[3], a_spec_shininess, a_alpha);
 
@@ -26,8 +28,7 @@ namespace uciniti
 
 	void MaterialManager::add_loaded_map(const char* a_key_name, Texture* a_loaded_map, material_map_type a_map_type)
 	{
-		// Verify the key actually exists to have a map
-		// added to it.
+		// Verify the key actually exists to have a map added to it.
 		if (!does_key_exist(a_key_name))
 		{
 			printf("ERROR: add_loaded_map() call. Could not find any material map key: '%s'.\n", a_key_name);
@@ -71,14 +72,14 @@ namespace uciniti
 
 	Texture* MaterialManager::get_material_map(const char* a_key_name, material_map_type a_map_type)
 	{
-		// Verify the key actually exists to have a map
-		// added to it.
+		// Verify the key actually exists to be read from.
 		if (!does_key_exist(a_key_name))
 		{
 			printf("ERROR: get_material_map() call. Could not find any material map key: '%s'.\n", a_key_name);
 			return nullptr;
 		}
 
+		// Retrieve the correct map type.
 		switch (a_map_type)
 		{
 		case material_map_type::ALPHA_MAP:
@@ -131,6 +132,7 @@ namespace uciniti
 
 	void MaterialManager::delete_material_at(const char* a_key_name)
 	{
+		// Verify the key being deleted does exist.
 		if (!does_key_exist(a_key_name))
 		{
 			printf("ERROR: delete_material_at() call. Cannot find key '%s' in material map.\n", a_key_name);
@@ -139,6 +141,7 @@ namespace uciniti
 
 		// Locate the key in the map
 		auto map_iterator = m_material_map_list.find(a_key_name);
+
 		// Key located, delete it. No point doing an if .end() check.
 		// Already know the key does exist from above.
 		delete map_iterator->second;

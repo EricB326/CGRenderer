@@ -7,7 +7,6 @@ layout (location = 3) in vec2 texture_coords;
 
 uniform mat4 projection_view_matrix;
 uniform mat4 model_matrix;
-uniform mat3 normal_matrix;
 uniform float time = 0.0f;
 
 out vec2 final_texture_coords;
@@ -21,7 +20,7 @@ void main()
 {	
 	final_texture_coords = texture_coords;	
 	
-	final_average_normals = normalize(vec3(model_matrix * vec4(normals.xyz, 0)));  //normalize(normal_matrix * normals.xyz);
+	final_average_normals = normalize(vec3(model_matrix * vec4(normals.xyz, 0)));
 	
 	final_position = model_matrix * local_position;
 	

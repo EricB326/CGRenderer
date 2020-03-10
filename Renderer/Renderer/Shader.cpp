@@ -1,5 +1,10 @@
-#include "Shader.h"
+/* Standard lib includes
+*/
 #include <sstream>
+
+/* User defined includes
+*/
+#include "Shader.h"
 
 namespace uciniti
 {
@@ -46,45 +51,6 @@ namespace uciniti
 				case shader_type::FRAGMENT:
 				{
 					create_shader(shader_string, GL_FRAGMENT_SHADER);
-					break;
-				}
-				default:
-					break;
-			}
-		}
-	}
-
-	void Shader::reload_shader()
-	{
-		// Read the new code from the file.
-		std::string reloaded_shader_string;
-		if (read_file_content(m_filepath, reloaded_shader_string))
-		{
-			switch (m_type_of_shader)
-			{
-				case shader_type::VERTEX:
-				{
-					create_shader(reloaded_shader_string, GL_VERTEX_SHADER);
-					break;
-				}
-				case shader_type::TESSELLATION_EVALUATION:
-				{
-					create_shader(reloaded_shader_string, GL_TESS_EVALUATION_SHADER);
-					break;
-				}
-				case shader_type::TESSELLATION_CONTROL:
-				{
-					create_shader(reloaded_shader_string, GL_TESS_CONTROL_SHADER);
-					break;
-				}
-				case shader_type::GEOMETRY:
-				{
-					create_shader(reloaded_shader_string, GL_GEOMETRY_SHADER);
-					break;
-				}
-				case shader_type::FRAGMENT:
-				{
-					create_shader(reloaded_shader_string, GL_FRAGMENT_SHADER);
 					break;
 				}
 				default:

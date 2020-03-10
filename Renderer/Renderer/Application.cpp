@@ -1,9 +1,10 @@
-#include "Application.h"
 /* Standard lib includes
 */
 #include <iostream>
 
-
+/* User defined includes
+*/
+#include "Application.h"
 #include "Time.h"
 
 namespace uciniti
@@ -49,6 +50,7 @@ namespace uciniti
 
 	bool Application::has_window_closed()
 	{
+		// If the 'ESC' key, or the 'X' in the window bar is pressed, the window has closed.
 		if (glfwGetKey(m_main_window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(m_main_window))
 			return true;
 
@@ -78,6 +80,7 @@ namespace uciniti
 			return false;
 		}
 
+		// Set the main window and verify it exists.
 		m_main_window = glfwCreateWindow(a_window_width, a_window_height, a_window_title, nullptr, nullptr);
 		if (!m_main_window)
 		{
@@ -88,6 +91,7 @@ namespace uciniti
 
 		glfwMakeContextCurrent(m_main_window);
 
+		// Initialize openGL
 		if (ogl_LoadFunctions() == ogl_LOAD_FAILED)
 		{
 			printf("ERROR: initialize() call. Failed to load OpenGL functionality.\n");
