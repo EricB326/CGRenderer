@@ -73,7 +73,7 @@ void main()
 	vec3 final_light_colour = calculate_directional_lights();
 	final_light_colour += calculate_point_lights();
 	
-	final_fragment_colour = vec4(final_albedo_map * final_light_colour, 1.0f);
+	final_fragment_colour = vec4(final_albedo_map * final_light_colour, 1.0f);// * 0.5 + vec3(0.5)
 }
 
 vec3 calculate_directional_lights()
@@ -95,11 +95,11 @@ vec3 calculate_point_lights()
 
 vec3 calculate_directional_light(light a_light, vec3 a_direction)
 {
-	// Retrive the bump map to use in calculating lighting.
+	// Retrieve the bump map to use in calculating lighting.
 	vec3 final_bump_map = texture(uniform_material.bump_map, final_texture_coords).rgb;
 		
 	// Calculate the ambient.
-	vec3 ambient_colour = (a_light.ambient_colour + uniform_material.ambient_colour) * a_light.ambient_intensity;
+	//vec3 ambient_colour = (a_light.ambient_colour + uniform_material.ambient_colour) * a_light.ambient_intensity;
 	
 	// Normalize direction and average normals.
 	vec3 normals = final_tangent_space * (final_bump_map * 2.0 - 1.0);
@@ -110,8 +110,8 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 	
 	// Calculate the diffuse.
 	vec3 diffuse_colour = (a_light.diffuse_colour * uniform_material.diffuse_colour // Diffuse colours multiplied,
-						   * lambert_term  											// Lambert term multiplied,
-						   * a_light.diffuse_intensity); 							// Intensity of the diffuse colour.
+						   * lambert_term  		)	;								// Lambert term multiplied,
+						   //* a_light.diffuse_intensity); 							// Intensity of the diffuse colour.
 	
 	// Only calculate specular as long as there is diffuse lighting.
 	vec3 specular_colour = vec3(0.0f, 0.0f, 0.0f);
@@ -131,7 +131,8 @@ vec3 calculate_directional_light(light a_light, vec3 a_direction)
 	}
 						  
 	
-	return (ambient_colour + diffuse_colour + specular_colour);
+	//return (ambient_colour + diffuse_colour + specular_colour);
+	return (diffuse_colour + specular_colour);
 }
 
 vec3 calculate_point_light(point_light a_point_light)

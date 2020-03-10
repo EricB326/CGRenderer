@@ -21,7 +21,7 @@ void main()
 {	
 	final_texture_coords = texture_coords;	
 	
-	final_average_normals = normal_matrix * normals.xyz;
+	final_average_normals = normalize(vec3(model_matrix * vec4(normals.xyz, 0)));  //normalize(normal_matrix * normals.xyz);
 	
 	final_position = model_matrix * local_position;
 	
@@ -35,10 +35,10 @@ void main()
 
 mat3 calculate_tbn_matrix()
 {
-	vec3 tangent = normalize(vec3(normal_matrix * tangents.xyz));
-	vec3 normal = normalize(vec3(normal_matrix * normals.xyz));
-	vec3 bitangent = cross(tangent, normal) * tangents.w;;
-	bitangent = normalize(bitangent);
+	vec3 tangent = normalize(tangents.xyz);
+	vec3 normal = final_average_normals;
+	vec3 bitangent = cross(normals.xyz, tangents.xyz) * tangents.w;;
+	bitangent = normalize(-bitangent);
 	
 	mat3 tangent_space = mat3(tangent, bitangent, normal);
 	return tangent_space;

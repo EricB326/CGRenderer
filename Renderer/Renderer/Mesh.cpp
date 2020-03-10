@@ -556,10 +556,13 @@ namespace uciniti
 			int location = std::string(a_material.alpha_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.alpha_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_alpha_map";
+
 
 			// Pass the texture file data.
-			TextureManager::create_texture("alpha_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("alpha_map"), material_map_type::ALPHA_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::ALPHA_MAP);
 		}
 
 		if (a_material.ambient_texname != "\0")
@@ -569,10 +572,12 @@ namespace uciniti
 			int location = std::string(a_material.ambient_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.ambient_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_ambient_map";
 
 			// Pass the texture file data.
-			TextureManager::create_texture("ambient_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("ambient_map"), material_map_type::AMBIENT_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::AMBIENT_MAP);
 		}
 
 		if (a_material.bump_texname != "\0")
@@ -582,10 +587,12 @@ namespace uciniti
 			int location = std::string(a_material.bump_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.bump_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
-			
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_bump_map";
+
 			// Pass the texture file data.
-			TextureManager::create_texture("bump_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("bump_map"), material_map_type::BUMP_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::BUMP_MAP);
 		}
 
 		if (a_material.diffuse_texname != "\0")
@@ -595,10 +602,12 @@ namespace uciniti
 			int location = std::string(a_material.diffuse_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.diffuse_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_diffuse_map";
 
 			// Pass the texture file data.
-			TextureManager::create_texture("diffuse_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("diffuse_map"), material_map_type::DIFFUSE_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::DIFFUSE_MAP);
 		}
 
 		if (a_material.displacement_texname != "\0")
@@ -608,10 +617,12 @@ namespace uciniti
 			int location = std::string(a_material.displacement_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.displacement_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_displacement_map";
 
 			// Pass the texture file data.
-			TextureManager::create_texture("displacement_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("displacement_map"), material_map_type::DISPLACEMENT_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::DISPLACEMENT_MAP);
 		}
 
 		if (a_material.specular_highlight_texname != "\0")
@@ -621,10 +632,12 @@ namespace uciniti
 			int location = std::string(a_material.specular_highlight_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.specular_highlight_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_spec_highlight_map";
 
 			// Pass the texture file data.
-			TextureManager::create_texture("specular_highlight_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("specular_highlight_map"), material_map_type::SPECULAR_HIGHLIGHT_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::SPECULAR_HIGHLIGHT_MAP);
 		}
 
 		if (a_material.specular_texname != "\0")
@@ -634,10 +647,12 @@ namespace uciniti
 			int location = std::string(a_material.specular_texname).rfind("\\");
 			std::string new_file_name = std::string(a_material.specular_texname).substr(location + 1);
 			std::string new_texture_path = std::string("..//Textures//" + new_file_name);
+			std::string identifier_name = a_material_name;
+			identifier_name = identifier_name + "_specular_map";
 
 			// Pass the texture file data.
-			TextureManager::create_texture("specular_map", new_texture_path.c_str());
-			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture("specular_map"), material_map_type::SPECULAR_MAP);
+			TextureManager::create_texture(identifier_name.c_str(), new_texture_path.c_str());
+			MaterialManager::add_loaded_map(a_material_name, TextureManager::get_texture(identifier_name.c_str()), material_map_type::SPECULAR_MAP);
 		}
 	}
 
