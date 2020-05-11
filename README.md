@@ -6,7 +6,6 @@ This project was made during the computer graphics project whilst studing at AIE
 
 ## Features
 * Easily managed shaders, meshes, texture, and material classes for quickly and efficently creating new objects to be rendered.
-* Fatal and non-fatal error handling. Allowing the rendering engine to still run even with human error. Displaying error based materials, textures, and/or meshes.
 
 ## Libraries
 These libraries are either currently implemented, or once were but dropped for the given reason.
